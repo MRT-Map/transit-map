@@ -1,5 +1,4 @@
-// Don't use window.onLoad like this in production, because it can only listen to one function.
-window.onload = function() {
+$(document).ready(function() {
   var eventsHandler;
 
   eventsHandler = {
@@ -80,4 +79,4 @@ window.onload = function() {
     center: 1,
     customEventsHandler: eventsHandler
   });
-};
+});
