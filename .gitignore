@@ -698,7 +698,3 @@ cython_debug/
 .idea/
 
 ### Other
-data.json
-out.svg
-services.json
-stops.json
