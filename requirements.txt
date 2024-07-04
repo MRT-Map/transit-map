@@ -1,0 +1,3 @@
+autocarter @ git+https://github.com/iiiii7d/autocarter
+requests
+vector
