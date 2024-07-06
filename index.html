@@ -18,14 +18,17 @@
     }
   </style>
 
-  <script defer src='https://unpkg.com/panzoom@9.4.3/dist/panzoom.min.js'></script>
+  <script src='https://unpkg.com/panzoom@9.4.3/dist/panzoom.min.js'></script>
   <script defer>
-    const element = document.querySelector('#svg')
-    panzoom(element)
+    function onLoad() {
+      const element = document.querySelector('#svg')
+      console.log(element)
+      panzoom(element)
+    }
   </script>
 
 </head>
-<body>
+<body onload="onLoad()">
   <div class="container" id="pan-container">
     <img id="svg" src="./out.svg">
   </div>
