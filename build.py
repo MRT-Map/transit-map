@@ -239,9 +239,24 @@ def wzr(n: Network, data):
     for line_uuid in company_json["lines"]:
         line_json = data["line"][line_uuid]
         colour = (
-                line_json['colour'] or "#ff0000"
+                line_json['colour'] or "#aa0000"
         )
         n.add_line(Line(id=line_uuid, name="WZR " + line_json["code"], colour=colour))
+
+    stations = _station(n, company_json, data)
+    _connect(n, company_json, data)
+    return stations
+
+def mtc(n: Network, data):
+    data = data["rail"]
+    company_uuid, company_json = next((k, v) for k, v in data["company"].items() if v["name"] == "MarbleRail")
+
+    for line_uuid in company_json["lines"]:
+        line_json = data["line"][line_uuid]
+        colour = (
+                line_json['colour'] or "#cc00cc"
+        )
+        n.add_line(Line(id=line_uuid, name="MTC " + line_json["code"], colour=colour))
 
     stations = _station(n, company_json, data)
     _connect(n, company_json, data)
@@ -257,6 +272,7 @@ def main():
     s_blu = blu(n, data)
     s_rlq = rlq(n, data)
     s_wzr = wzr(n, data)
+    s_mtc = mtc(n, data)
 
     s_nflr['Dand Grand Central'].merge_into(n, s_intra['Dand Grand Central'])
     s_blu['Dand Central'].merge_into(n, s_intra['Dand Grand Central'])
