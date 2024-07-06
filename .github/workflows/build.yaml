@@ -17,5 +17,8 @@ jobs:
           python-version: '3.12' 
       - run: pip install -Ur requirements.txt
       - run: python build.py
+      - run: |
+            git config --global user.name "github actions"
+            git config --global user.email "username@users.noreply.github.com"
       - run: git commit -am "update @ $(date +%Y%m%dT%H:%M:%S%Z)"
       - run: git push
