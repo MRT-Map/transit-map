@@ -1,0 +1,21 @@
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: 0 */12 * * *
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5 
+        with:
+          python-version: '3.12' 
+      - run: pip install -Ur requirements.txt
+      - run: python build.py
+      - run: git commit -am "update @ $(date +%Y%m%dT%H:%M:%S%Z)"
+      - run: git push
