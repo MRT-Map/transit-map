@@ -93,7 +93,7 @@ def mrt(n: Network, data):
         station = n.add_station(
             Station(
                 id=station_uuid,
-                name=(" ".join(station_json["codes"]) + " " + (station_json["name"] or "")),
+                name=(" ".join(sorted(list(station_json["codes"]))) + " " + (station_json["name"] or "")),
                 coordinates=vector.obj(x=coordinates[0], y=coordinates[1]),
             )
         )
@@ -319,7 +319,7 @@ def main():
     s_rlq['Utopia IKEA'].merge_into(n, s_blu['Utopia - IKEA'])
     s_blu['Saint Roux'].merge_into(n, s_intra['Saint Roux Gare Orsay'])
     s_rlq['Saint Roux Gare Orsay'].merge_into(n, s_intra['Saint Roux Gare Orsay'])
-    s_nflr['Port of Porton'].merge_into(n, s_mrt['U138 M83 Porton'])
+    s_nflr['Port of Porton'].merge_into(n, s_mrt['M83 U138 Porton'])
     s_nflr['Uacam Beach'].merge_into(n, s_mrt['M87 Uacam Beach East'])
     s_nflr['M90 Theme Park'].merge_into(n, s_mrt['M90 '])
     # s_nflr['Castlehill'].merge_into(n, s_mrt['U126 '])
