@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A topological transit map of railways on the MRT">
+  <meta name="author" content="MRT Mapping Services">
+  <!--<link rel="shortcut icon" href="favicon.png">-->
+  <title>Transit Map</title>
+  <style>
+    .container {
+      width: 100vw;
+      height: 100vh;
+      position: fixed;
+      top: 0;
+      left: 0;
+    }
+  </style>
+
+  <script defer src='https://unpkg.com/panzoom@9.4.3/dist/panzoom.min.js'></script>
+  <script defer>
+    const element = document.querySelector('#svg')
+    panzoom(element)
+  </script>
+
+</head>
+<body>
+  <div class="container" id="pan-container">
+    <img id="svg" src="./out.svg">
+  </div>
+</body>
+
+</html>
