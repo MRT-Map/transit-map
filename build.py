@@ -12,6 +12,7 @@ def _station(n: Network, company_json, data):
         station_json = data["station"][station_uuid]
         coordinates = station_json["coordinates"]
         if coordinates is None:
+            print("No conns", station_json["name"])
             continue
         if station_json['name'] is None:
             continue
@@ -33,6 +34,7 @@ def _connect(n: Network, company_json, data):
             continue
         station_json = data["station"][station_uuid]
         if not station_json["connections"]:
+            print("No conns", station_json["name"])
             pass
         for conn_station_uuid, connections in station_json["connections"].items():
             if conn_station_uuid in visited_stations or conn_station_uuid not in n.stations:
@@ -340,6 +342,7 @@ def main():
     s_rlq = rlq(n, data)
     s_wzr = wzr(n, data)
     s_mtc = mtc(n, data)
+    nsc(n, data)
     rn(n, data)
     s_fr = fr(n, data)
     s_redtrain = redtrain(n, data)
