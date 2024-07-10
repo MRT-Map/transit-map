@@ -3,7 +3,7 @@ import re
 import requests
 import vector
 from autocarter.drawer import Drawer, Style
-from autocarter.network import Line, Network, Station, Connection
+from autocarter.network import Connection, Line, Network, Station
 
 
 def _station(n: Network, company_json, data):
@@ -12,7 +12,6 @@ def _station(n: Network, company_json, data):
         station_json = data["station"][station_uuid]
         coordinates = station_json["coordinates"]
         if coordinates is None:
-            print("No coords", station_json["name"])
             continue
         if station_json['name'] is None:
             continue
@@ -34,7 +33,7 @@ def _connect(n: Network, company_json, data):
             continue
         station_json = data["station"][station_uuid]
         if not station_json["connections"]:
-            print("No conns", station_json["name"])
+            pass
         for conn_station_uuid, connections in station_json["connections"].items():
             if conn_station_uuid in visited_stations or conn_station_uuid not in n.stations:
                 continue
@@ -95,7 +94,7 @@ def mrt(n: Network, data):
         station = n.add_station(
             Station(
                 id=station_uuid,
-                name=(" ".join(sorted(list(station_json["codes"]))) + " " + (station_json["name"] or "")).strip(),
+                name=(" ".join(sorted(station_json["codes"])) + " " + (station_json["name"] or "")).strip(),
                 coordinates=vector.obj(x=coordinates[0], y=coordinates[1]),
             )
         )
@@ -298,6 +297,7 @@ def redtrain(n: Network, data):
     _connect(n, company_json, data)
     return stations
 
+
 def rn(n: Network, data):
     data = data["rail"]
     company_uuid, company_json = next((k, v) for k, v in data["company"].items() if v["name"] == "RailNorth")
@@ -312,6 +312,7 @@ def rn(n: Network, data):
     stations = _station(n, company_json, data)
     _connect(n, company_json, data)
     return stations
+
 
 def fr(n: Network, data):
     data = data["rail"]
@@ -328,6 +329,7 @@ def fr(n: Network, data):
     _connect(n, company_json, data)
     return stations
 
+
 def main():
     data = requests.get("https://raw.githubusercontent.com/MRT-Map/gatelogue/dist/data_no_sources.json").json()
     n = Network()
@@ -338,7 +340,7 @@ def main():
     s_rlq = rlq(n, data)
     s_wzr = wzr(n, data)
     s_mtc = mtc(n, data)
-    s_rn = rn(n, data)
+    rn(n, data)
     s_fr = fr(n, data)
     s_redtrain = redtrain(n, data)
 
@@ -397,7 +399,7 @@ def main():
     s_fr['Bakersville Grand Central'].merge_into(n, s_intra['Bakersville Grand Central'])
     s_fr['Westchester Junction'].merge_into(n, s_intra['Bakersville Westchester Junction - Canal Works'])
     s_intra['Laclede Theater District'].merge_into(n, s_intra[
-        'Laclede Theater District - Xavier Airport'])  # TODO gatelogue
+        'Laclede Theater District - Xavier Airport'])  # TODO: gatelogue
     s_blu['Whitechapel Border'].merge_into(n, s_intra['Whitechapel Border'])
     s_blu['Waterville Union Station'].merge_into(n, s_intra['Waterville Union Station'])
     s_blu['Fort Yaxier Central'].merge_into(n, s_intra['Fort Yaxier Central'])
@@ -447,8 +449,7 @@ def main():
     s_rlq['Moramoa Central'].merge_into(n, s_blu['Moramoa Central'])
     s_intra['Seuland'].merge_into(n, s_blu['Seuland'])
 
-
-    for station_uuid, station in n.stations.items():
+    for station_uuid in n.stations:
         station_json = data['rail']["station"][station_uuid]
         for prox_station_uuid in station_json['proximity'].get("railstation", {}):
             if prox_station_uuid not in n.stations:
