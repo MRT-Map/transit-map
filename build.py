@@ -433,7 +433,7 @@ def main():
     s_mtc['Seolho Midwest'].merge_into(n, s_nflr['Seolho Midwest'])
     s_mtc['Oceanside Bayfront'].merge_into(n, s_nflr['Oceanside Bayfront'])
     s_mtc['Tung Wan'].merge_into(n, s_nflr['Tung Wan'])
-    # s_mtc['Edwardsburg'].merge_into(n, s_nflr['Edwardsburg'])
+    s_mtc['Edwardsburg'].merge_into(n, s_nflr['Edwardsburg'])
     s_blu['Musique'].merge_into(n, s_mrt['D11 Musique'])
     s_blu['Elecna Bay North'].merge_into(n, s_intra['Elecna Bay North'])
     s_rlq['Elecna Bay North'].merge_into(n, s_intra['Elecna Bay North'])
