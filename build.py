@@ -4,7 +4,7 @@ import requests
 import vector
 from autocarter.drawer import Drawer, Style
 from autocarter.network import Connection, Line, Network, Station
-
+from autocarter.colour import Colour, Stroke
 
 def _station(n: Network, company_json, data):
     stations = {}
@@ -147,13 +147,16 @@ def nflr(n: Network, data):
         line_json = data["line"][line_uuid]
         name = line_json["name"]
         if name.startswith("N") or name == "AB":
-            colour = col[name]
+            colour = Colour.solid(col[name])
         elif name.startswith("W"):
-            colour = (col[name[1:]], "#0000")
+            colour = Colour([
+                Stroke(colour=col[name[1:]], thickness_multiplier=1.0),
+                Stroke(colour="#0000", thickness_multiplier=0.5),
+            ])
         else:
             match = re.search(r"^(.)(\d+)(.*)$", line_json["name"])
-            colour = col[match.group(2)]
-        n.add_line(Line(id=line_uuid, name="nFLR " + line_json["code"], colour=colour))
+            colour = Colour.solid(col[match.group(2)])
+        n.add_line(Line(id=line_uuid, name="nFLR " + line_json["code"], colour=Colour.solid(colour)))
 
     stations = _station(n, company_json, data)
     _connect(n, company_json, data)
@@ -187,12 +190,12 @@ def intra(n: Network, data):
     for line_uuid in company_json["lines"]:
         line_json = data["line"][line_uuid]
         colour = (
-            "#3d6edd"
+            Colour.solid("#3d6edd")
             if line_json["code"].startswith("MCR") or line_json["code"].startswith("LM") or line_json[
                 "code"].startswith("S")
-            else tuple(col[line_json["code"]])
+            else Colour.stroke(Stroke(dash_length=8, dashes=tuple(col[line_json["code"]])))
             if line_json["code"] in col
-            else "#888"
+            else Colour.solid("#888")
         )
         n.add_line(
             Line(id=line_uuid, name="IR " + line_json["code"].replace("<", "&lt;").replace(">", "&gt;"), colour=colour))
@@ -208,8 +211,8 @@ def blu(n: Network, data):
 
     for line_uuid in company_json["lines"]:
         line_json = data["line"][line_uuid]
-        colour = (
-            "#c01c22" if line_json["code"].endswith("X") else "#0a7ec3" if line_json["code"][
+        colour = Colour.solid(
+            "#c01c22" if line_json["code"].endswith("X") and line_json['code'][0].isdigit() else "#0a7ec3" if line_json["code"][
                 -1].isdigit() else "#0c4a9e"
         )
         n.add_line(Line(id=line_uuid, name="Blu " + line_json["code"], colour=colour))
@@ -225,7 +228,7 @@ def rlq(n: Network, data):
 
     for line_uuid in company_json["lines"]:
         line_json = data["line"][line_uuid]
-        colour = (
+        colour = Colour.solid(
             "#ff5500" if line_json['code'].startswith("IC") else "#ffaa00"
         )
         n.add_line(Line(id=line_uuid, name="RLQ " + line_json["code"], colour=colour))
@@ -241,7 +244,7 @@ def wzr(n: Network, data):
 
     for line_uuid in company_json["lines"]:
         line_json = data["line"][line_uuid]
-        colour = (
+        colour = Colour.solid(
                 line_json['colour'] or "#aa0000"
         )
         n.add_line(Line(id=line_uuid, name="WZR " + line_json["code"], colour=colour))
@@ -257,7 +260,7 @@ def mtc(n: Network, data):
 
     for line_uuid in company_json["lines"]:
         line_json = data["line"][line_uuid]
-        colour = (
+        colour = Colour.solid(
                 line_json['colour'] or "#cc00cc"
         )
         n.add_line(Line(id=line_uuid, name="MTC " + line_json["code"], colour=colour))
@@ -274,7 +277,7 @@ def nsc(n: Network, data):
 
     for line_uuid in company_json["lines"]:
         line_json = data["line"][line_uuid]
-        colour = (
+        colour = Colour.solid(
                 line_json['colour'] or "#cc0000"
         )
         n.add_line(Line(id=line_uuid, name="NSC " + line_json["code"], colour=colour))
@@ -290,7 +293,7 @@ def redtrain(n: Network, data):
 
     for line_uuid in company_json["lines"]:
         line_json = data["line"][line_uuid]
-        colour = (
+        colour = Colour.solid(
                 line_json['colour'] or "#ff0000"
         )
         n.add_line(Line(id=line_uuid, name="RedTrain " + line_json["code"], colour=colour))
@@ -306,7 +309,7 @@ def rn(n: Network, data):
 
     for line_uuid in company_json["lines"]:
         line_json = data["line"][line_uuid]
-        colour = (
+        colour = Colour.solid(
                 line_json['colour'] or "#000080"
         )
         n.add_line(Line(id=line_uuid, name=line_json["code"], colour=colour))
@@ -322,7 +325,7 @@ def fr(n: Network, data):
 
     for line_uuid in company_json["lines"]:
         line_json = data["line"][line_uuid]
-        colour = (
+        colour = Colour.solid(
                 line_json['colour'] or "#000080"
         )
         n.add_line(Line(id=line_uuid, name="FR " + line_json["code"], colour=colour))
