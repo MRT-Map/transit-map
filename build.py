@@ -85,7 +85,7 @@ def mrt(n: Network, data):
     for line_uuid in company_json["lines"]:
         line_json = data["line"][line_uuid]
         colour = col.get(line_json["code"], "#888")
-        n.add_line(Line(id=line_uuid, name="MRT " + line_json["code"], colour=colour))
+        n.add_line(Line(id=line_uuid, name="MRT " + line_json["code"], colour=Colour.solid(colour)))
 
     stations = {}
     for station_uuid in company_json["stations"]:
@@ -156,7 +156,7 @@ def nflr(n: Network, data):
         else:
             match = re.search(r"^(.)(\d+)(.*)$", line_json["name"])
             colour = Colour.solid(col[match.group(2)])
-        n.add_line(Line(id=line_uuid, name="nFLR " + line_json["code"], colour=Colour.solid(colour)))
+        n.add_line(Line(id=line_uuid, name="nFLR " + line_json["code"], colour=colour))
 
     stations = _station(n, company_json, data)
     _connect(n, company_json, data)
