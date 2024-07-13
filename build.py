@@ -149,10 +149,10 @@ def nflr(n: Network, data):
         if name.startswith("N") or name == "AB":
             colour = Colour.solid(col[name])
         elif name.startswith("W"):
-            colour = Colour([
+            colour = Colour((
                 Stroke(dashes=col[name[1:]], thickness_multiplier=1.0),
                 Stroke(dashes="#0000", thickness_multiplier=0.5),
-            ])
+            ))
         else:
             match = re.search(r"^(.)(\d+)(.*)$", line_json["name"])
             colour = Colour.solid(col[match.group(2)])
