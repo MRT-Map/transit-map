@@ -37,7 +37,10 @@ def _connect(n: Network, company_json, data):
         if not station_json["connections"]:
             print("No conns", station_json["name"])  # noqa: T201
         for conn_station_uuid, connections in station_json["connections"].items():
-            if conn_station_uuid in visited_stations or conn_station_uuid not in n.stations:
+            if (
+                conn_station_uuid in visited_stations
+                or conn_station_uuid not in n.stations
+            ):
                 continue
             for connection in connections:
                 n.connect(
@@ -50,7 +53,9 @@ def _connect(n: Network, company_json, data):
 
 def mrt(n: Network, data):
     data = data["rail"]
-    company_uuid, company_json = next((k, v) for k, v in data["company"].items() if v["name"] == "MRT")
+    company_uuid, company_json = next(
+        (k, v) for k, v in data["company"].items() if v["name"] == "MRT"
+    )
 
     col = {
         "A": "#00FFFF",
@@ -85,7 +90,13 @@ def mrt(n: Network, data):
     for line_uuid in company_json["lines"]:
         line_json = data["line"][line_uuid]
         colour = col.get(line_json["code"], "#888")
-        n.add_line(Line(id=line_uuid, name="MRT " + line_json["code"], colour=Colour.solid(colour)))
+        n.add_line(
+            Line(
+                id=line_uuid,
+                name="MRT " + line_json["code"],
+                colour=Colour.solid(colour),
+            )
+        )
 
     stations = {}
     for station_uuid in company_json["stations"]:
@@ -96,7 +107,11 @@ def mrt(n: Network, data):
         station = n.add_station(
             Station(
                 id=station_uuid,
-                name=(" ".join(sorted(station_json["codes"])) + " " + (station_json["name"] or "")).strip(),
+                name=(
+                    " ".join(sorted(station_json["codes"]))
+                    + " "
+                    + (station_json["name"] or "")
+                ).strip(),
                 coordinates=vector.obj(x=coordinates[0], y=coordinates[1]),
             )
         )
@@ -109,7 +124,9 @@ def mrt(n: Network, data):
 
 def nflr(n: Network, data):
     data = data["rail"]
-    company_uuid, company_json = next((k, v) for k, v in data["company"].items() if v["name"] == "nFLR")
+    company_uuid, company_json = next(
+        (k, v) for k, v in data["company"].items() if v["name"] == "nFLR"
+    )
 
     col = {
         "1": "#c00",
@@ -159,7 +176,9 @@ def nflr(n: Network, data):
         else:
             match = re.search(r"^(.)(\d+)(.*)$", line_json["name"])
             colour = Colour.solid(col[match.group(2)])
-        line = n.add_line(Line(id=line_uuid, name="nFLR " + line_json["code"], colour=colour))
+        line = n.add_line(
+            Line(id=line_uuid, name="nFLR " + line_json["code"], colour=colour)
+        )
         lines[line.name] = line
 
     stations = _station(n, company_json, data)
@@ -169,7 +188,9 @@ def nflr(n: Network, data):
 
 def intra(n: Network, data):
     data = data["rail"]
-    company_uuid, company_json = next((k, v) for k, v in data["company"].items() if v["name"] == "IntraRail")
+    company_uuid, company_json = next(
+        (k, v) for k, v in data["company"].items() if v["name"] == "IntraRail"
+    )
 
     col = {
         "6": ["#d16d8f"],
@@ -198,12 +219,19 @@ def intra(n: Network, data):
             if line_json["code"].startswith("MCR")
             or line_json["code"].startswith("LM")
             or line_json["code"].startswith("S")
-            else Colour.stroke(Stroke(dash_length=8, dashes=tuple(col[line_json["code"]])))
+            else Colour.stroke(
+                Stroke(dash_length=8, dashes=tuple(col[line_json["code"]]))
+            )
             if line_json["code"] in col
             else Colour.solid("#888")
         )
         n.add_line(
-            Line(id=line_uuid, name="IR " + line_json["code"].replace("<", "&lt;").replace(">", "&gt;"), colour=colour)
+            Line(
+                id=line_uuid,
+                name="IR "
+                + line_json["code"].replace("<", "&lt;").replace(">", "&gt;"),
+                colour=colour,
+            )
         )
 
     stations = _station(n, company_json, data)
@@ -213,7 +241,9 @@ def intra(n: Network, data):
 
 def blu(n: Network, data):
     data = data["rail"]
-    company_uuid, company_json = next((k, v) for k, v in data["company"].items() if v["name"] == "BluRail")
+    company_uuid, company_json = next(
+        (k, v) for k, v in data["company"].items() if v["name"] == "BluRail"
+    )
 
     for line_uuid in company_json["lines"]:
         line_json = data["line"][line_uuid]
@@ -233,11 +263,15 @@ def blu(n: Network, data):
 
 def rlq(n: Network, data):
     data = data["rail"]
-    company_uuid, company_json = next((k, v) for k, v in data["company"].items() if v["name"] == "RaiLinQ")
+    company_uuid, company_json = next(
+        (k, v) for k, v in data["company"].items() if v["name"] == "RaiLinQ"
+    )
 
     for line_uuid in company_json["lines"]:
         line_json = data["line"][line_uuid]
-        colour = Colour.solid("#ff5500" if line_json["code"].startswith("IC") else "#ffaa00")
+        colour = Colour.solid(
+            "#ff5500" if line_json["code"].startswith("IC") else "#ffaa00"
+        )
         n.add_line(Line(id=line_uuid, name="RLQ " + line_json["code"], colour=colour))
 
     stations = _station(n, company_json, data)
@@ -247,7 +281,9 @@ def rlq(n: Network, data):
 
 def wzr(n: Network, data):
     data = data["rail"]
-    company_uuid, company_json = next((k, v) for k, v in data["company"].items() if v["name"] == "West Zeta Rail")
+    company_uuid, company_json = next(
+        (k, v) for k, v in data["company"].items() if v["name"] == "West Zeta Rail"
+    )
 
     for line_uuid in company_json["lines"]:
         line_json = data["line"][line_uuid]
@@ -261,7 +297,9 @@ def wzr(n: Network, data):
 
 def mtc(n: Network, data):
     data = data["rail"]
-    company_uuid, company_json = next((k, v) for k, v in data["company"].items() if v["name"] == "MarbleRail")
+    company_uuid, company_json = next(
+        (k, v) for k, v in data["company"].items() if v["name"] == "MarbleRail"
+    )
 
     for line_uuid in company_json["lines"]:
         line_json = data["line"][line_uuid]
@@ -276,7 +314,9 @@ def mtc(n: Network, data):
 def nsc(n: Network, data):
     data = data["rail"]
     company_uuid, company_json = next(
-        (k, v) for k, v in data["company"].items() if v["name"] == "Network South Central"
+        (k, v)
+        for k, v in data["company"].items()
+        if v["name"] == "Network South Central"
     )
 
     for line_uuid in company_json["lines"]:
@@ -291,12 +331,16 @@ def nsc(n: Network, data):
 
 def redtrain(n: Network, data):
     data = data["rail"]
-    company_uuid, company_json = next((k, v) for k, v in data["company"].items() if v["name"] == "RedTrain")
+    company_uuid, company_json = next(
+        (k, v) for k, v in data["company"].items() if v["name"] == "RedTrain"
+    )
 
     for line_uuid in company_json["lines"]:
         line_json = data["line"][line_uuid]
         colour = Colour.solid(line_json["colour"] or "#ff0000")
-        n.add_line(Line(id=line_uuid, name="RedTrain " + line_json["code"], colour=colour))
+        n.add_line(
+            Line(id=line_uuid, name="RedTrain " + line_json["code"], colour=colour)
+        )
 
     stations = _station(n, company_json, data)
     _connect(n, company_json, data)
@@ -305,7 +349,9 @@ def redtrain(n: Network, data):
 
 def rn(n: Network, data):
     data = data["rail"]
-    company_uuid, company_json = next((k, v) for k, v in data["company"].items() if v["name"] == "RailNorth")
+    company_uuid, company_json = next(
+        (k, v) for k, v in data["company"].items() if v["name"] == "RailNorth"
+    )
 
     for line_uuid in company_json["lines"]:
         line_json = data["line"][line_uuid]
@@ -319,20 +365,28 @@ def rn(n: Network, data):
 
 def fr(n: Network, data):
     data = data["rail"]
-    company_uuid, company_json = next((k, v) for k, v in data["company"].items() if v["name"] == "Fred Rail")
+    company_uuid, company_json = next(
+        (k, v) for k, v in data["company"].items() if v["name"] == "Fred Rail"
+    )
 
+    lines = {}
     for line_uuid in company_json["lines"]:
         line_json = data["line"][line_uuid]
         colour = Colour.solid(line_json["colour"] or "#000080")
-        n.add_line(Line(id=line_uuid, name="FR " + line_json["code"], colour=colour))
+        line = n.add_line(
+            Line(id=line_uuid, name="FR " + line_json["code"], colour=colour)
+        )
+        lines[line.name] = line
 
     stations = _station(n, company_json, data)
     _connect(n, company_json, data)
-    return stations
+    return stations, lines
 
 
 def main():
-    data = requests.get("https://raw.githubusercontent.com/MRT-Map/gatelogue/dist/data_no_sources.json").json()  # noqa: S113
+    data = requests.get(
+        "https://raw.githubusercontent.com/MRT-Map/gatelogue/dist/data_no_sources.json"
+    ).json()  # noqa: S113
     n = Network()
     s_mrt = mrt(n, data)
     s_nflr, l_nflr = nflr(n, data)
@@ -343,7 +397,7 @@ def main():
     s_mtc = mtc(n, data)
     nsc(n, data)
     rn(n, data)
-    s_fr = fr(n, data)
+    s_fr, l_fr = fr(n, data)
     s_redtrain = redtrain(n, data)
 
     s_nflr["Deadbush Karaj Expo"].adjacent_stations[l_nflr["nFLR R5A"].id] = [
@@ -362,6 +416,14 @@ def main():
         [s_nflr["Light Society Villeside"].id],
         [s_nflr["Sansvikk Kamprad Airfield"].id, s_nflr["Glacierton"].id],
     ]
+    s_fr["New Haven"].adjacent_stations[l_fr["FR New Jerseyan"].id] = [
+        [s_fr["Boston Clapham Junction"].id],
+        [s_fr["Tung Wan Transfer"].id, s_fr["Palo Alto"].id],
+    ]
+    s_fr["Palo Alto"].adjacent_stations[l_fr["FR New Jerseyan"].id] = [
+        [s_fr["Concord"].id],
+        [s_fr["Tung Wan Transfer"].id, s_fr["New Haven"].id],
+    ]
 
     s_nflr["Dand Grand Central"].merge_into(n, s_intra["Dand Grand Central"])
     s_blu["Dand Central"].merge_into(n, s_intra["Dand Grand Central"])
@@ -370,20 +432,37 @@ def main():
     s_intra["Tembok Railway Station"].merge_into(n, s_nflr["Tembok"])
     s_wzr["Tembok"].merge_into(n, s_nflr["Tembok"])
     s_nflr["Tembok"].merge_into(n, s_mrt["M54 WS24 Tembok"])
-    s_blu["Heampstead Kings Cross"].merge_into(n, s_intra["Deadbush Heampstead Kings Cross Railway Terminal"])
+    s_blu["Heampstead Kings Cross"].merge_into(
+        n, s_intra["Deadbush Heampstead Kings Cross Railway Terminal"]
+    )
+    s_fr["Kings Cross Railway Terminal"].merge_into(
+        n, s_intra["Deadbush Heampstead Kings Cross Railway Terminal"]
+    )
     s_blu["Schillerton Maple Street"].merge_into(n, s_intra["Schillerton Maple Street"])
     s_blu["Boston Waterloo"].merge_into(n, s_intra["Boston Waterloo Station"])
     s_mtc["Boston Waterloo"].merge_into(n, s_intra["Boston Waterloo Station"])
-    s_mtc["Boston Clapham Junction"].merge_into(n, s_intra["Boston Clapham Junction"])
-    s_fr["Boston Clapham Junction"].merge_into(n, s_intra["Boston Clapham Junction"])
+    s_fr["Boston Waterloo"].merge_into(n, s_intra["Boston Waterloo Station"])
+    s_mtc["Boston Clapham Junction"].merge_into(n, s_fr["Boston Clapham Junction"])
+    s_intra["Boston Clapham Junction"].merge_into(n, s_fr["Boston Clapham Junction"])
     s_blu["Zaquar Tanzanite Station"].merge_into(n, s_intra["Zaquar Tanzanite Station"])
     s_blu["Tranquil Forest Central"].merge_into(n, s_intra["Tranquil Forest Central"])
     s_intra["MCR HQ"].merge_into(n, s_intra["Scarborough MCR HQ"])
-    s_blu["San Dzobiak Union Station"].merge_into(n, s_intra["San Dzobiak Union Square"])
-    s_redtrain["San Dzobiak Union Square"].merge_into(n, s_intra["San Dzobiak Union Square"])
+    s_blu["San Dzobiak Union Station"].merge_into(
+        n, s_intra["San Dzobiak Union Square"]
+    )
+    s_redtrain["San Dzobiak Union Square"].merge_into(
+        n, s_intra["San Dzobiak Union Square"]
+    )
+    s_fr["San Dzobiak"].merge_into(n, s_intra["San Dzobiak Union Square"])
     s_blu["Siletz Salvador Station"].merge_into(n, s_intra["Siletz Salvador Station"])
-    s_redtrain["Siletz Salvador Station"].merge_into(n, s_intra["Siletz Salvador Station"])
-    s_blu["Los Angeles-Farwater Union Station"].merge_into(n, s_intra["Los Angeles-Farwater Union Station"])
+    s_fr["Siletz"].merge_into(n, s_intra["Siletz Salvador Station"])
+    s_redtrain["Siletz Salvador Station"].merge_into(
+        n, s_intra["Siletz Salvador Station"]
+    )
+    s_fr["Lodminechead"].merge_into(n, s_intra["Lochminehead Trijunction"])
+    s_blu["Los Angeles-Farwater Union Station"].merge_into(
+        n, s_intra["Los Angeles-Farwater Union Station"]
+    )
     s_blu["Valemount"].merge_into(n, s_intra["Valemount"])
     s_blu["Ravenna Union Station"].merge_into(n, s_intra["Ravenna Union Station"])
     s_blu["Rank Resort Central"].merge_into(n, s_intra["Rank Resort Central"])
@@ -402,37 +481,65 @@ def main():
     s_blu["UCWT International Airport West"].merge_into(
         n, s_intra["Formosa-Sealane-Danielston UCWT International Airport West"]
     )
-    s_fr["UCWTIA"].merge_into(n, s_intra["Formosa-Sealane-Danielston UCWT International Airport West"])
+    s_fr["UCWTIA"].merge_into(
+        n, s_intra["Formosa-Sealane-Danielston UCWT International Airport West"]
+    )
     s_blu["Sealane Central"].merge_into(n, s_intra["Sealane Central"])
     s_rlq["Sealane Central"].merge_into(n, s_intra["Sealane Central"])
-    s_blu["Central City Warp Rail Terminal"].merge_into(n, s_intra["Central City Warp Rail Terminal"])
+    s_blu["Central City Warp Rail Terminal"].merge_into(
+        n, s_intra["Central City Warp Rail Terminal"]
+    )
     s_rlq["Central City"].merge_into(n, s_intra["Central City Warp Rail Terminal"])
-    s_redtrain["Central City Warp Rail Terminal"].merge_into(n, s_intra["Central City Warp Rail Terminal"])
+    s_fr["Central City"].merge_into(n, s_intra["Central City Warp Rail Terminal"])
+    s_redtrain["Central City Warp Rail Terminal"].merge_into(
+        n, s_intra["Central City Warp Rail Terminal"]
+    )
+    s_fr["Sealane New Forest Station"].merge_into(
+        n, s_intra["Sealane New Forest Terminal"]
+    )
+    s_fr["Central City Beltway Terminal North"].merge_into(
+        n, s_intra["Central City Beltway Terminal North"]
+    )
     s_blu["Utopia - AFK"].merge_into(n, s_intra["Utopia Anthony Fokker Transit Hub"])
+    s_fr["Utopia AFK"].merge_into(n, s_intra["Utopia Anthony Fokker Transit Hub"])
     s_blu["Venceslo"].merge_into(n, s_intra["Venceslo Union Station"])
     s_redtrain["Venceslo"].merge_into(n, s_intra["Venceslo Union Station"])
     s_blu["Laclede Central"].merge_into(n, s_intra["Laclede Central"])
     s_rlq["Laclede Central"].merge_into(n, s_intra["Laclede Central"])
     s_blu["Vermilion"].merge_into(n, s_intra["Vermilion Victory Square"])
-    s_blu["Bakersville Grand Central"].merge_into(n, s_intra["Bakersville Grand Central"])
-    s_fr["Bakersville Grand Central"].merge_into(n, s_intra["Bakersville Grand Central"])
-    s_fr["Westchester Junction"].merge_into(n, s_intra["Bakersville Westchester Junction - Canal Works"])
+    s_blu["Bakersville Grand Central"].merge_into(
+        n, s_intra["Bakersville Grand Central"]
+    )
+    s_fr["Bakersville Grand Central"].merge_into(
+        n, s_intra["Bakersville Grand Central"]
+    )
+    s_fr["Westchester Junction"].merge_into(
+        n, s_intra["Bakersville Westchester Junction - Canal Works"]
+    )
     s_intra["Laclede Theater District"].merge_into(
         n, s_intra["Laclede Theater District - Xavier Airport"]
     )  # TODO: gatelogue
     s_blu["Whitechapel Border"].merge_into(n, s_intra["Whitechapel Border"])
     s_blu["Waterville Union Station"].merge_into(n, s_intra["Waterville Union Station"])
     s_blu["Fort Yaxier Central"].merge_into(n, s_intra["Fort Yaxier Central"])
-    s_blu["Sunshine Coast Máspalmas Terminal"].merge_into(n, s_intra["Sunshine Coast Máspalmas Terminal"])
+    s_blu["Sunshine Coast Máspalmas Terminal"].merge_into(
+        n, s_intra["Sunshine Coast Máspalmas Terminal"]
+    )
     s_blu["Murrville Central"].merge_into(n, s_intra["Murrville Central"])
     s_blu["BirchView Central"].merge_into(n, s_intra["BirchView Central"])
     s_rlq["Birchview Central"].merge_into(n, s_intra["BirchView Central"])
     s_rlq["Titsensaki"].merge_into(n, s_blu["Titsensaki North City"])
     s_rlq["East Mesa"].merge_into(n, s_intra["East Mesa M. Bubbles Station"])
     s_rlq["Mons Pratus"].merge_into(n, s_intra["Mons Pratus Transportation Hub"])
-    s_rlq["Segville International"].merge_into(n, s_intra["Segville International Airport"])
-    s_blu["Segville International"].merge_into(n, s_intra["Segville International Airport"])
-    s_fr["Segville International Airport"].merge_into(n, s_intra["Segville International Airport"])
+    s_rlq["Segville International"].merge_into(
+        n, s_intra["Segville International Airport"]
+    )
+    s_blu["Segville International"].merge_into(
+        n, s_intra["Segville International Airport"]
+    )
+    s_fr["Segville International Airport"].merge_into(
+        n, s_intra["Segville International Airport"]
+    )
     s_rlq["Utopia Central"].merge_into(n, s_blu["Utopia Central"])
     s_rlq["Utopia Stephenson"].merge_into(n, s_blu["Utopia Stephenson"])
     s_rlq["Utopia IKEA"].merge_into(n, s_blu["Utopia - IKEA"])
@@ -442,9 +549,13 @@ def main():
     s_nflr["Uacam Beach"].merge_into(n, s_mrt["M87 Uacam Beach East"])
     s_nflr["M90 Theme Park"].merge_into(n, s_mrt["M90"])
     s_nflr["Castlehill"].merge_into(n, s_mrt["U126"])
-    s_nflr["Lilygrove Union"].merge_into(n, s_mrt["ZS52 Lilygrove Union Station/Heliport"])
+    s_nflr["Lilygrove Union"].merge_into(
+        n, s_mrt["ZS52 Lilygrove Union Station/Heliport"]
+    )
     s_nflr["Dewford City Lometa"].merge_into(n, s_wzr["Dewford City Lometa Station"])
-    s_mtc["Cape Cambridge John Glenn"].merge_into(n, s_nflr["Cape Cambridge John Glenn Transit Centre"])
+    s_mtc["Cape Cambridge John Glenn"].merge_into(
+        n, s_nflr["Cape Cambridge John Glenn Transit Centre"]
+    )
     s_mtc["Port Sonder"].merge_into(n, s_nflr["Port Sonder"])
     s_mtc["Sandfield"].merge_into(n, s_nflr["Sandfield"])
     s_mtc["Seolho Midwest"].merge_into(n, s_nflr["Seolho Midwest"])
@@ -454,20 +565,39 @@ def main():
     s_blu["Musique"].merge_into(n, s_mrt["D11 Musique"])
     s_blu["Elecna Bay North"].merge_into(n, s_intra["Elecna Bay North"])
     s_rlq["Elecna Bay North"].merge_into(n, s_intra["Elecna Bay North"])
-    s_rlq["Outer Solarion"].merge_into(n, s_intra["Achowalogen Takachsin Outer Solarion"])
-    s_rlq["Downtown Solarion"].merge_into(n, s_intra["Achowalogen Takachsin Downtown Solarion"])
-    s_rlq["Achowalogen Takachsin Suburb"].merge_into(n, s_intra["Achowalogen Takachsin Suburb"])
-    s_rlq["Downtown Achowalogen Takachsin/Covina"].merge_into(n, s_intra["Achowalogen Takachsin-Covina Downtown"])
-    s_rlq["Achowalogen Takachsin Western Transportation Hub"].merge_into(n, s_intra["Achowalogen Takachsin West"])
-    s_blu["Chalxior Femtoprism Airfield"].merge_into(n, s_intra["Chalxior Femtoprism Airfield"])
+    s_rlq["Outer Solarion"].merge_into(
+        n, s_intra["Achowalogen Takachsin Outer Solarion"]
+    )
+    s_rlq["Downtown Solarion"].merge_into(
+        n, s_intra["Achowalogen Takachsin Downtown Solarion"]
+    )
+    s_rlq["Achowalogen Takachsin Suburb"].merge_into(
+        n, s_intra["Achowalogen Takachsin Suburb"]
+    )
+    s_rlq["Downtown Achowalogen Takachsin/Covina"].merge_into(
+        n, s_intra["Achowalogen Takachsin-Covina Downtown"]
+    )
+    s_rlq["Achowalogen Takachsin Western Transportation Hub"].merge_into(
+        n, s_intra["Achowalogen Takachsin West"]
+    )
+    s_blu["Chalxior Femtoprism Airfield"].merge_into(
+        n, s_intra["Chalxior Femtoprism Airfield"]
+    )
     s_blu["Pilmont"].merge_into(n, s_intra["Pilmont"])
-    s_blu["New Acreadium - Central District"].merge_into(n, s_intra["New Acreadium Central District"])
-    s_blu["New Acreadium - Schiphol International"].merge_into(n, s_intra["New Acreadium Schiphol Airport"])
+    s_blu["New Acreadium - Central District"].merge_into(
+        n, s_intra["New Acreadium Central District"]
+    )
+    s_blu["New Acreadium - Schiphol International"].merge_into(
+        n, s_intra["New Acreadium Schiphol Airport"]
+    )
     s_blu["Antioch Union Station"].merge_into(n, s_intra["Antioch Union Station"])
     s_rlq["Antioch"].merge_into(n, s_intra["Antioch Union Station"])
     s_rlq["Moramoa Wyndham Street"].merge_into(n, s_blu["Moramoa Wyndham Street"])
     s_rlq["Moramoa Central"].merge_into(n, s_blu["Moramoa Central"])
     s_intra["Seuland"].merge_into(n, s_blu["Seuland"])
+    s_intra["Whiteley Turing Square"].merge_into(n, s_rlq["Whiteley Turing Square"])
+    s_fr["Whiteley Turing Square"].merge_into(n, s_rlq["Whiteley Turing Square"])
+    s_blu["Whiteley College Park"].merge_into(n, s_rlq["Whiteley College Park"])
 
     for station_uuid in n.stations:
         station_json = data["rail"]["station"][station_uuid]
