@@ -143,6 +143,7 @@ def nflr(n: Network, data):
         "AB": "",
     }
 
+    lines = {}
     for line_uuid in company_json["lines"]:
         line_json = data["line"][line_uuid]
         name = line_json["name"]
@@ -156,11 +157,12 @@ def nflr(n: Network, data):
         else:
             match = re.search(r"^(.)(\d+)(.*)$", line_json["name"])
             colour = Colour.solid(col[match.group(2)])
-        n.add_line(Line(id=line_uuid, name="nFLR " + line_json["code"], colour=colour))
+        line = n.add_line(Line(id=line_uuid, name="nFLR " + line_json["code"], colour=colour))
+        lines[line.name] = line
 
     stations = _station(n, company_json, data)
     _connect(n, company_json, data)
-    return stations
+    return stations, lines
 
 
 def intra(n: Network, data):
@@ -339,7 +341,7 @@ def main():
     data = requests.get("https://raw.githubusercontent.com/MRT-Map/gatelogue/dist/data_no_sources.json").json()
     n = Network()
     s_mrt = mrt(n, data)
-    s_nflr = nflr(n, data)
+    s_nflr, l_nflr = nflr(n, data)
     s_intra = intra(n, data)
     s_blu = blu(n, data)
     s_rlq = rlq(n, data)
@@ -349,6 +351,11 @@ def main():
     rn(n, data)
     s_fr = fr(n, data)
     s_redtrain = redtrain(n, data)
+
+    s_nflr['Deadbush Karaj Expo'].adjacent_stations[l_nflr['nFLR R5A'].id] = [[s_nflr['Deadbush Works'].id], [s_nflr['Deadbush Valletta'].id, s_nflr['Deadbush New Euphorial'].id]]
+    s_nflr['Sansvikk Kamprad Airfield'].adjacent_stations[l_nflr['nFLR R23'].id] = [[s_nflr['Sansvikk Karlstad'].id], [s_nflr['Glacierton'].id, s_nflr['Port Dupont'].id]]
+    s_nflr['Glacierton'].adjacent_stations[l_nflr['nFLR R23'].id] = [[s_nflr['Snowydale'].id], [s_nflr['Sansvikk Kamprad Airfield'].id, s_nflr['Port Dupont'].id]]
+    s_nflr['Port Dupont'].adjacent_stations[l_nflr['nFLR R23'].id] = [[s_nflr['Light Society Villeside'].id], [s_nflr['Sansvikk Kamprad Airfield'].id, s_nflr['Glacierton'].id]]
 
     s_nflr['Dand Grand Central'].merge_into(n, s_intra['Dand Grand Central'])
     s_blu['Dand Central'].merge_into(n, s_intra['Dand Grand Central'])
