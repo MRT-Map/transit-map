@@ -459,7 +459,7 @@ def main():
     s_redtrain["Siletz Salvador Station"].merge_into(
         n, s_intra["Siletz Salvador Station"]
     )
-    s_fr["Lodminechead"].merge_into(n, s_intra["Lochminehead Trijunction"])
+    s_fr["Lochminehead"].merge_into(n, s_intra["Lochminehead Trijunction"])
     s_blu["Los Angeles-Farwater Union Station"].merge_into(
         n, s_intra["Los Angeles-Farwater Union Station"]
     )
