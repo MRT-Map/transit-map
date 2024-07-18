@@ -1,7 +1,9 @@
 on:
   workflow_dispatch:
-  schedule:
-    - cron: 0 */12 * * *
+  # schedule:
+  #   - cron: 0 */12 * * *
+  repository_dispatch:
+    types: [update_map]
 
 permissions:
   contents: write
