@@ -600,7 +600,7 @@ def main():
     s_blu["Whiteley College Park"].merge_into(n, s_rlq["Whiteley College Park"])
     s_rn["Kappen"].merge_into(n, s_mrt["RE16 Kappen Hauptbahnhof"])
     s_intra["Royalston"].merge_into(n, s_mrt["V14"])
-    s_intra["Sunshine Coast Máspalmas International Airport"].merge_into(s_blu['Sunshine Coast Máspalmas International Airport'])
+    s_intra["Sunshine Coast Máspalmas International Airport"].merge_into(n, s_blu['Sunshine Coast Máspalmas International Airport'])
 
 
     for station_uuid in n.stations:
