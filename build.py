@@ -396,7 +396,7 @@ def main():
     s_wzr = wzr(n, data)
     s_mtc = mtc(n, data)
     nsc(n, data)
-    rn(n, data)
+    s_rn = rn(n, data)
     s_fr, l_fr = fr(n, data)
     s_redtrain = redtrain(n, data)
 
@@ -598,6 +598,10 @@ def main():
     s_intra["Whiteley Turing Square"].merge_into(n, s_rlq["Whiteley Turing Square"])
     s_fr["Whiteley Turing Square"].merge_into(n, s_rlq["Whiteley Turing Square"])
     s_blu["Whiteley College Park"].merge_into(n, s_rlq["Whiteley College Park"])
+    s_rn["Kappen"].merge_into(n, s_mrt["RE16 Kappen Hauptbahnhof"])
+    s_intra["Royalston"].merge_into(n, s_mrt["V14"])
+    s_intra["Sunshine Coast Máspalmas International Airport"].merge_into(s_blu['Sunshine Coast Máspalmas International Airport'])
+
 
     for station_uuid in n.stations:
         station_json = data["rail"]["station"][station_uuid]
