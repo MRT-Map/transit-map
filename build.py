@@ -531,9 +531,6 @@ def main():
     s_fr["Westchester Junction"].merge_into(
         n, s_intra["Bakersville Westchester Junction - Canal Works"]
     )
-    s_intra["Laclede Theater District"].merge_into(
-        n, s_intra["Laclede Theater District - Xavier Airport"]
-    )  # TODO: gatelogue
     s_blu["Whitechapel Border"].merge_into(n, s_intra["Whitechapel Border"])
     s_blu["Waterville Union Station"].merge_into(n, s_intra["Waterville Union Station"])
     s_blu["Fort Yaxier Central"].merge_into(n, s_intra["Fort Yaxier Central"])
@@ -624,6 +621,13 @@ def main():
     s_blu["Airchester Central"].merge_into(n, s_rlq["Airchester Central"])
     s_blu["Accerton"].merge_into(n, s_rlq["Accerton"])
     s_nflr["WMI / Blackwater"].merge_into(n, s_intra["Deadbush Blackwater"])
+    s_blu["Oparia Downtown"].merge_into(n, s_intra["Oparia Downtown"])
+    s_rlq["Oparia Downtown"].merge_into(n, s_intra["Oparia Downtown"])
+    s_rn["Oparia Downtown"].merge_into(n, s_intra["Oparia Downtown"])
+    s_mrt["ZN40 Oparia Downtown"].merge_into(n, s_intra["Oparia Downtown"])
+    s_blu["Oparia LeTourneau International Airport"].merge_into(n, s_intra["Oparia LeTourneau International Airport"])
+    s_rn["Oparia LeTourneau International Airport"].merge_into(n, s_intra["Oparia LeTourneau International Airport"])
+    s_blu["Woodsdale"].merge_into(n, s_fr["Woodsdale"])
 
     for station_uuid in n.stations:
         station_json = data["rail"]["station"][station_uuid]
