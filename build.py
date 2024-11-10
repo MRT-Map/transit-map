@@ -1,26 +1,26 @@
 import re
 
-import requests
+import niquests
 import vector
 from autocarter.colour import Colour, Stroke
 from autocarter.drawer import Drawer, Style
 from autocarter.network import Connection, Line, Network, Station
 
 
-def _station(n: Network, company_json, data):
+def _station(n: Network, company: dict, data: dict[str, dict]):
     stations = {}
-    for station_uuid in company_json["stations"]:
-        station_json = data["station"][station_uuid]
-        coordinates = station_json["coordinates"]
+    for station_i in company["stations"]:
+        station = data[str(station_i)]
+        coordinates = station["coordinates"]
         if coordinates is None:
-            print("No conns", station_json["name"])  # noqa: T201
+            print("No coords", station["name"])  # noqa: T201
             continue
-        if station_json["name"] is None:
+        if station["name"] is None:
             continue
         station = n.add_station(
             Station(
-                id=station_uuid,
-                name=station_json["name"].replace("&", "&amp;"),
+                id=station_i,
+                name=station["name"].replace("&", "&amp;"),
                 coordinates=vector.obj(x=coordinates[0], y=coordinates[1]),
             )
         )
@@ -28,34 +28,31 @@ def _station(n: Network, company_json, data):
     return stations
 
 
-def _connect(n: Network, company_json, data):
+def _connect(n: Network, company: dict, data: dict[str, dict]):
     visited_stations = []
-    for station_uuid in company_json["stations"]:
-        if station_uuid not in n.stations:
+    for station_i in company["stations"]:
+        if station_i not in n.stations:
             continue
-        station_json = data["station"][station_uuid]
-        if not station_json["connections"]:
-            print("No conns", station_json["name"])  # noqa: T201
-        for conn_station_uuid, connections in station_json["connections"].items():
+        station = data[str(station_i)]
+        if not station["connections"]:
+            print("No conns", station["name"])  # noqa: T201
+        for conn_station_i, connections in station["connections"].items():
             if (
-                    conn_station_uuid in visited_stations
-                    or conn_station_uuid not in n.stations
+                    conn_station_i in visited_stations
+                    or conn_station_i not in n.stations
             ):
                 continue
             for connection in connections:
                 n.connect(
-                    n.stations[station_uuid],
-                    n.stations[conn_station_uuid],
+                    n.stations[station_i],
+                    n.stations[conn_station_i],
                     n.lines[connection["line"]],
                 )
-        visited_stations.append(station_uuid)
+        visited_stations.append(station)
 
 
-def mrt(n: Network, data):
-    data = data["rail"]
-    company_uuid, company_json = next(
-        (k, v) for k, v in data["company"].items() if v["name"] == "MRT"
-    )
+def mrt(n: Network, data: dict[str, dict]):
+    company = next(a for a in data.values() if a['type'] == "RailCompany" and a['name'] == "MRT")
 
     col = {
         "A": "#00FFFF",
@@ -87,46 +84,43 @@ def mrt(n: Network, data):
         "Z": "#EEEEEE",
     }
 
-    for line_uuid in company_json["lines"]:
-        line_json = data["line"][line_uuid]
-        colour = col.get(line_json["code"], "#888")
+    for line_i in company["lines"]:
+        line = data[str(line_i)]
+        colour = col.get(line["code"], "#888")
         n.add_line(
             Line(
-                id=line_uuid,
-                name="MRT " + line_json["code"],
+                id=line_i,
+                name="MRT " + line["code"],
                 colour=Colour.solid(colour),
             )
         )
 
     stations = {}
-    for station_uuid in company_json["stations"]:
-        station_json = data["station"][station_uuid]
-        if station_json["world"] == "Old" or not station_json["connections"]:
+    for station_i in company["stations"]:
+        station = data[str(station_i)]
+        if station["world"] == "Old" or not station["connections"]:
             continue
-        coordinates = station_json["coordinates"] or [0, 0]
+        coordinates = station["coordinates"] or [0, 0]
         station = n.add_station(
             Station(
-                id=station_uuid,
+                id=station_i,
                 name=(
-                        " ".join(sorted(station_json["codes"]))
+                        " ".join(sorted(station["codes"]))
                         + " "
-                        + (station_json["name"] or "")
+                        + (station["name"] or "")
                 ).strip(),
                 coordinates=vector.obj(x=coordinates[0], y=coordinates[1]),
             )
         )
         stations[station.name] = station
 
-    _connect(n, company_json, data)
+    _connect(n, company, data)
 
     return stations
 
 
-def nflr(n: Network, data):
-    data = data["rail"]
-    company_uuid, company_json = next(
-        (k, v) for k, v in data["company"].items() if v["name"] == "nFLR"
-    )
+def nflr(n: Network, data: dict[str, dict]):
+    company = next(a for a in data.values() if a['type'] == "RailCompany" and a['name'] == "nFLR")
 
     col = {
         "1": "#c00",
@@ -161,9 +155,9 @@ def nflr(n: Network, data):
     }
 
     lines = {}
-    for line_uuid in company_json["lines"]:
-        line_json = data["line"][line_uuid]
-        name = line_json["name"]
+    for line_i in company["lines"]:
+        line = data[str(line_i)]
+        name = line["name"]
         if name.startswith("N") or name == "AB":
             colour = Colour.solid(col[name])
         elif name.startswith("W"):
@@ -174,23 +168,20 @@ def nflr(n: Network, data):
                 )
             )
         else:
-            match = re.search(r"^(.)(\d+)(.*)$", line_json["name"])
+            match = re.search(r"^(.)(\d+)(.*)$", line["name"])
             colour = Colour.solid(col[match.group(2)])
         line = n.add_line(
-            Line(id=line_uuid, name="nFLR " + line_json["code"], colour=colour)
+            Line(id=line_i, name="nFLR " + line["code"], colour=colour)
         )
         lines[line.name] = line
 
-    stations = _station(n, company_json, data)
-    _connect(n, company_json, data)
+    stations = _station(n, company, data)
+    _connect(n, company, data)
     return stations, lines
 
 
-def intra(n: Network, data):
-    data = data["rail"]
-    company_uuid, company_json = next(
-        (k, v) for k, v in data["company"].items() if v["name"] == "IntraRail"
-    )
+def intra(n: Network, data: dict[str, dict]):
+    company = next(a for a in data.values() if a['type'] == "RailCompany" and a['name'] == "IntraRail")
 
     col = {
         "6": ["#d16d8f"],
@@ -213,182 +204,156 @@ def intra(n: Network, data):
     }
 
     lines = {}
-    for line_uuid in company_json["lines"]:
-        line_json = data["line"][line_uuid]
+    for line_i in company["lines"]:
+        line = data[str(line_i)]
         colour = (
             Colour.solid("#3d6edd")
-            if line_json["code"].startswith("MCR")
-               or line_json["code"].startswith("LM")
-               or line_json["code"].startswith("S")
+            if line["code"].startswith("MCR")
+               or line["code"].startswith("LM")
+               or line["code"].startswith("S")
             else Colour.stroke(
-                Stroke(dash_length=8, dashes=tuple(col[line_json["code"]]))
+                Stroke(dash_length=8, dashes=tuple(col[line["code"]]))
             )
-            if line_json["code"] in col
+            if line["code"] in col
             else Colour.solid("#888")
         )
         line = n.add_line(
             Line(
-                id=line_uuid,
+                id=line_i,
                 name="IR "
-                     + line_json["code"].replace("<", "&lt;").replace(">", "&gt;"),
+                     + line["code"].replace("<", "&lt;").replace(">", "&gt;"),
                 colour=colour,
             )
         )
         lines[line.name] = line
 
-    stations = _station(n, company_json, data)
-    _connect(n, company_json, data)
+    stations = _station(n, company, data)
+    _connect(n, company, data)
     return stations, lines
 
 
-def blu(n: Network, data):
-    data = data["rail"]
-    company_uuid, company_json = next(
-        (k, v) for k, v in data["company"].items() if v["name"] == "BluRail"
-    )
+def blu(n: Network, data: dict[str, dict]):
+    company = next(a for a in data.values() if a['type'] == "RailCompany" and a['name'] == "BluRail")
 
-    for line_uuid in company_json["lines"]:
-        line_json = data["line"][line_uuid]
+    for line_i in company["lines"]:
+        line = data[str(line_i)]
         colour = Colour.solid(
             "#c01c22"
-            if line_json["code"].endswith("X") and line_json["code"][0].isdigit()
+            if line["code"].endswith("X") and line["code"][0].isdigit()
             else "#0a7ec3"
-            if line_json["code"][-1].isdigit()
+            if line["code"][-1].isdigit()
             else "#0c4a9e"
         )
-        n.add_line(Line(id=line_uuid, name="Blu " + line_json["code"], colour=colour))
+        n.add_line(Line(id=line_i, name="Blu " + line["code"], colour=colour))
 
-    stations = _station(n, company_json, data)
-    _connect(n, company_json, data)
+    stations = _station(n, company, data)
+    _connect(n, company, data)
     return stations
 
 
-def rlq(n: Network, data):
-    data = data["rail"]
-    company_uuid, company_json = next(
-        (k, v) for k, v in data["company"].items() if v["name"] == "RaiLinQ"
-    )
+def rlq(n: Network, data: dict[str, dict]):
+    company = next(a for a in data.values() if a['type'] == "RailCompany" and a['name'] == "RaiLinQ")
 
-    for line_uuid in company_json["lines"]:
-        line_json = data["line"][line_uuid]
+    for line_i in company["lines"]:
+        line = data[str(line_i)]
         colour = Colour.solid(
-            "#ff5500" if line_json["code"].startswith("IC") else "#ffaa00"
+            "#ff5500" if line["code"].startswith("IC") else "#ffaa00"
         )
-        n.add_line(Line(id=line_uuid, name="RLQ " + line_json["code"], colour=colour))
+        n.add_line(Line(id=line_i, name="RLQ " + line["code"], colour=colour))
 
-    stations = _station(n, company_json, data)
-    _connect(n, company_json, data)
+    stations = _station(n, company, data)
+    _connect(n, company, data)
     return stations
 
 
-def wzr(n: Network, data):
-    data = data["rail"]
-    company_uuid, company_json = next(
-        (k, v) for k, v in data["company"].items() if v["name"] == "West Zeta Rail"
-    )
+def wzr(n: Network, data: dict[str, dict]):
+    company = next(a for a in data.values() if a['type'] == "RailCompany" and a['name'] == "West Zeta Rail")
 
-    for line_uuid in company_json["lines"]:
-        line_json = data["line"][line_uuid]
-        colour = Colour.solid(line_json["colour"] or "#aa0000")
-        n.add_line(Line(id=line_uuid, name="WZR " + line_json["code"], colour=colour))
+    for line_i in company["lines"]:
+        line = data[str(line_i)]
+        colour = Colour.solid(line["colour"] or "#aa0000")
+        n.add_line(Line(id=line_i, name="WZR " + line["code"], colour=colour))
 
-    stations = _station(n, company_json, data)
-    _connect(n, company_json, data)
+    stations = _station(n, company, data)
+    _connect(n, company, data)
     return stations
 
 
-def mtc(n: Network, data):
-    data = data["rail"]
-    company_uuid, company_json = next(
-        (k, v) for k, v in data["company"].items() if v["name"] == "MarbleRail"
-    )
+def mtc(n: Network, data: dict[str, dict]):
+    company = next(a for a in data.values() if a['type'] == "RailCompany" and a['name'] == "MarbleRail")
 
-    for line_uuid in company_json["lines"]:
-        line_json = data["line"][line_uuid]
-        colour = Colour.solid(line_json["colour"] or "#cc00cc")
-        n.add_line(Line(id=line_uuid, name="MTC " + line_json["code"], colour=colour))
+    for line_i in company["lines"]:
+        line = data[str(line_i)]
+        colour = Colour.solid(line["colour"] or "#cc00cc")
+        n.add_line(Line(id=line_i, name="MTC " + line["code"], colour=colour))
 
-    stations = _station(n, company_json, data)
-    _connect(n, company_json, data)
+    stations = _station(n, company, data)
+    _connect(n, company, data)
     return stations
 
 
-def nsc(n: Network, data):
-    data = data["rail"]
-    company_uuid, company_json = next(
-        (k, v)
-        for k, v in data["company"].items()
-        if v["name"] == "Network South Central"
-    )
+def nsc(n: Network, data: dict[str, dict]):
+    company = next(a for a in data.values() if a['type'] == "RailCompany" and a['name'] == "Network South Central")
 
-    for line_uuid in company_json["lines"]:
-        line_json = data["line"][line_uuid]
-        colour = Colour.solid(line_json["colour"] or "#cc0000")
-        n.add_line(Line(id=line_uuid, name="NSC " + line_json["code"], colour=colour))
+    for line_i in company["lines"]:
+        line = data[str(line_i)]
+        colour = Colour.solid(line["colour"] or "#cc0000")
+        n.add_line(Line(id=line_i, name="NSC " + line["code"], colour=colour))
 
-    stations = _station(n, company_json, data)
-    _connect(n, company_json, data)
+    stations = _station(n, company, data)
+    _connect(n, company, data)
     return stations
 
 
-def redtrain(n: Network, data):
-    data = data["rail"]
-    company_uuid, company_json = next(
-        (k, v) for k, v in data["company"].items() if v["name"] == "RedTrain"
-    )
+def redtrain(n: Network, data: dict[str, dict]):
+    company = next(a for a in data.values() if a['type'] == "RailCompany" and a['name'] == "RedTrain")
 
-    for line_uuid in company_json["lines"]:
-        line_json = data["line"][line_uuid]
-        colour = Colour.solid(line_json["colour"] or "#ff0000")
+    for line_i in company["lines"]:
+        line = data[str(line_i)]
+        colour = Colour.solid(line["colour"] or "#ff0000")
         n.add_line(
-            Line(id=line_uuid, name="RedTrain " + line_json["code"], colour=colour)
+            Line(id=line_i, name="RedTrain " + line["code"], colour=colour)
         )
 
-    stations = _station(n, company_json, data)
-    _connect(n, company_json, data)
+    stations = _station(n, company, data)
+    _connect(n, company, data)
     return stations
 
 
-def rn(n: Network, data):
-    data = data["rail"]
-    company_uuid, company_json = next(
-        (k, v) for k, v in data["company"].items() if v["name"] == "RailNorth"
-    )
+def rn(n: Network, data: dict[str, dict]):
+    company = next(a for a in data.values() if a['type'] == "RailCompany" and a['name'] == "RailNorth")
 
-    for line_uuid in company_json["lines"]:
-        line_json = data["line"][line_uuid]
-        colour = Colour.solid(line_json["colour"] or "#000080")
-        n.add_line(Line(id=line_uuid, name=line_json["code"], colour=colour))
+    for line_i in company["lines"]:
+        line = data[str(line_i)]
+        colour = Colour.solid(line["colour"] or "#000080")
+        n.add_line(Line(id=line_i, name=line["code"], colour=colour))
 
-    stations = _station(n, company_json, data)
-    _connect(n, company_json, data)
+    stations = _station(n, company, data)
+    _connect(n, company, data)
     return stations
 
 
-def fr(n: Network, data):
-    data = data["rail"]
-    company_uuid, company_json = next(
-        (k, v) for k, v in data["company"].items() if v["name"] == "Fred Rail"
-    )
+def fr(n: Network, data: dict[str, dict]):
+    company = next(a for a in data.values() if a['type'] == "RailCompany" and a['name'] == "Fred Rail")
 
     lines = {}
-    for line_uuid in company_json["lines"]:
-        line_json = data["line"][line_uuid]
-        colour = Colour.solid(line_json["colour"] or "#000080")
+    for line_i in company["lines"]:
+        line = data[str(line_i)]
+        colour = Colour.solid(line["colour"] or "#000080")
         line = n.add_line(
-            Line(id=line_uuid, name="FR " + line_json["code"], colour=colour)
+            Line(id=line_i, name="FR " + line["code"], colour=colour)
         )
         lines[line.name] = line
 
-    stations = _station(n, company_json, data)
-    _connect(n, company_json, data)
+    stations = _station(n, company, data)
+    _connect(n, company, data)
     return stations, lines
 
 
 def main():
-    data = requests.get(
+    data = niquests.get(
         "https://raw.githubusercontent.com/MRT-Map/gatelogue/dist/data_no_sources.json"
-    ).json()  # noqa: S113
+    ).json()['nodes']  # noqa: S113
     n = Network()
     s_mrt = mrt(n, data)
     s_nflr, l_nflr = nflr(n, data)
