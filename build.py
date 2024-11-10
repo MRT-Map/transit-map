@@ -14,7 +14,7 @@ def _station(n: Network, company: dict, data: dict[str, dict]):
         station = data[str(station_i)]
         coordinates = station["coordinates"]
         if coordinates is None:
-            print("No coords", station["name"])  # noqa: T201
+            print("No coords", company['name'], station["name"])  # noqa: T201
             continue
         if station["name"] is None:
             continue
@@ -36,8 +36,9 @@ def _connect(n: Network, company: dict, data: dict[str, dict]):
             continue
         station = data[str(station_i)]
         if not station["connections"]:
-            print("No conns", station["name"])  # noqa: T201
+            print("No conns", company['name'], station["name"])  # noqa: T201
         for conn_station_i, connections in station["connections"].items():
+            conn_station_i = int(conn_station_i)
             if (
                     conn_station_i in visited_stations
                     or conn_station_i not in n.stations
@@ -357,17 +358,17 @@ def main():
     )  # noqa: S1131
     data = json.loads(data.text)['nodes']
     n = Network()
-    s_mrt = mrt(n, data)
+    mrt(n, data)
     s_nflr, l_nflr = nflr(n, data)
-    s_intra, l_intra = intra(n, data)
-    s_blu = blu(n, data)
-    s_rlq = rlq(n, data)
-    s_wzr = wzr(n, data)
-    s_mtc = mtc(n, data)
+    intra(n, data)
+    blu(n, data)
+    rlq(n, data)
+    wzr(n, data)
+    mtc(n, data)
     nsc(n, data)
-    s_rn = rn(n, data)
+    rn(n, data)
     s_fr, l_fr = fr(n, data)
-    s_redtrain = redtrain(n, data)
+    redtrain(n, data)
 
     s_nflr["Deadbush Karaj Expo"].adjacent_stations[l_nflr["nFLR R5A"].id] = [
         [s_nflr["Deadbush Works"].id],
@@ -393,217 +394,32 @@ def main():
         [s_fr["Concord"].id],
         [s_fr["Tung Wan Transfer"].id, s_fr["New Haven"].id],
     ]
-    s_intra["Shadowpoint Capitol Union Station"].adjacent_stations[l_intra["IR 54"].id] = [
-        [s_intra["Shadowpoint Old Town"].id],
-        [s_intra["Geneva Bay Hendon Road"].id, s_intra["Hendon"].id],
-    ]
-    s_intra["Creeperville Sakura Park"].adjacent_stations[l_intra["IR 54"].id] = [
-        [s_intra["Creeperville Shimoko"].id],
-        [s_intra["New Cainport Riverside Stadium"].id, s_intra["Creeperville Haneda Airport"].id],
-    ]
+    # s_intra["Shadowpoint Capitol Union Station"].adjacent_stations[l_intra["IR 54"].id] = [
+    #     [s_intra["Shadowpoint Old Town"].id],
+    #     [s_intra["Geneva Bay Hendon Road"].id, s_intra["Hendon"].id],
+    # ]
+    # s_intra["Creeperville Sakura Park"].adjacent_stations[l_intra["IR 54"].id] = [
+    #     [s_intra["Creeperville Shimoko"].id],
+    #     [s_intra["New Cainport Riverside Stadium"].id, s_intra["Creeperville Haneda Airport"].id],
+    # ]
 
-    s_nflr["Dand Grand Central"].merge_into(n, s_intra["Dand Grand Central"])
-    s_blu["Dand Central"].merge_into(n, s_intra["Dand Grand Central"])
-    s_intra["Foresne Liveray"].merge_into(n, s_nflr["Foresne Liveray"])
-    s_intra["Liveray"].merge_into(n, s_nflr["Foresne Liveray"])
-    s_intra["Tembok Railway Station"].merge_into(n, s_nflr["Tembok"])
-    s_wzr["Tembok"].merge_into(n, s_nflr["Tembok"])
-    s_nflr["Tembok"].merge_into(n, s_mrt["M54 WS24 Tembok"])
-    s_blu["Heampstead Kings Cross"].merge_into(
-        n, s_intra["Deadbush Heampstead Kings Cross Railway Terminal"]
-    )
-    s_fr["Kings Cross Railway Terminal"].merge_into(
-        n, s_intra["Deadbush Heampstead Kings Cross Railway Terminal"]
-    )
-    s_blu["Schillerton Maple Street"].merge_into(n, s_intra["Schillerton Maple Street"])
-    s_blu["Boston Waterloo"].merge_into(n, s_intra["Boston Waterloo Station"])
-    s_mtc["Boston Waterloo"].merge_into(n, s_intra["Boston Waterloo Station"])
-    s_fr["Boston Waterloo"].merge_into(n, s_intra["Boston Waterloo Station"])
-    s_mtc["Boston Clapham Junction"].merge_into(n, s_fr["Boston Clapham Junction"])
-    s_intra["Boston Clapham Junction"].merge_into(n, s_fr["Boston Clapham Junction"])
-    s_blu["Zaquar Tanzanite Station"].merge_into(n, s_intra["Zaquar Tanzanite Station"])
-    s_intra["MCR HQ"].merge_into(n, s_intra["Scarborough MCR HQ"])
-    s_blu["San Dzobiak Union Station"].merge_into(
-        n, s_intra["San Dzobiak Union Square"]
-    )
-    s_redtrain["San Dzobiak Union Square"].merge_into(
-        n, s_intra["San Dzobiak Union Square"]
-    )
-    s_fr["San Dzobiak"].merge_into(n, s_intra["San Dzobiak Union Square"])
-    s_blu["Siletz Salvador Station"].merge_into(n, s_intra["Siletz Salvador Station"])
-    s_fr["Siletz"].merge_into(n, s_intra["Siletz Salvador Station"])
-    s_redtrain["Siletz Salvador Station"].merge_into(
-        n, s_intra["Siletz Salvador Station"]
-    )
-    s_fr["Lochminehead"].merge_into(n, s_intra["Lochminehead Trijunction"])
-    s_blu["Los Angeles-Farwater Union Station"].merge_into(
-        n, s_intra["Los Angeles-Farwater Union Station"]
-    )
-    s_blu["Valemount"].merge_into(n, s_intra["Valemount"])
-    s_blu["Ravenna Union Station"].merge_into(n, s_intra["Ravenna Union Station"])
-    s_blu["New Gensokyo Hakurei Shrine"].merge_into(n, s_intra["New Gensokyo Hakurei Shrine"])
-    s_blu["New Gensokyo Regional Airport"].merge_into(n, s_intra["New Gensokyo Regional Airport"])
-    s_blu["Shark Town"].merge_into(n, s_intra["Shark Town"])
-    s_blu["Bechtel"].merge_into(n, s_intra["Bechtel"])
-    s_blu["Niwen"].merge_into(n, s_intra["Niwen Train Station"])
-    s_blu["Risima"].merge_into(n, s_intra["Risima"])
-    s_blu["Rank Resort Central"].merge_into(n, s_intra["Rank Resort Central"])
-    s_blu["Whitecliff Central"].merge_into(n, s_intra["Whitecliff Central"])
-    s_rlq["Whitecliff Central"].merge_into(n, s_intra["Whitecliff Central"])
-    s_blu["Segav Sal"].merge_into(n, s_intra["Segav Sal"])
-    s_blu["Northlend"].merge_into(n, s_intra["Northlend Union Station"])
-    s_rlq["Northlend Union"].merge_into(n, s_intra["Northlend Union Station"])
-    s_rlq["Vegeta Junction"].merge_into(n, s_intra["Vegeta Junction"])
-    s_blu["Broxbourne"].merge_into(n, s_intra["Broxbourne"])
-    s_blu["Ilirea Transit Center"].merge_into(n, s_intra["Ilirea Transit Center"])
-    s_rlq["Ilirea ITC"].merge_into(n, s_intra["Ilirea Transit Center"])
-    s_intra["Ilirea Airport Station"].merge_into(n, s_blu["Ilirea Midcity Airport"])
-    s_rlq["Ilirea Airport"].merge_into(n, s_blu["Ilirea Midcity Airport"])
-    s_blu["Waverly"].merge_into(n, s_intra["Waverly Edinburgh Station"])
-    s_blu["UCWT International Airport West"].merge_into(
-        n, s_intra["Formosa-Sealane-Danielston UCWT International Airport West"]
-    )
-    s_fr["UCWTIA"].merge_into(
-        n, s_intra["Formosa-Sealane-Danielston UCWT International Airport West"]
-    )
-    s_blu["Sealane Central"].merge_into(n, s_intra["Sealane Central"])
-    s_rlq["Sealane Central"].merge_into(n, s_intra["Sealane Central"])
-    s_blu["Central City Warp Rail Terminal"].merge_into(
-        n, s_intra["Central City Warp Rail Terminal"]
-    )
-    s_rlq["Central City"].merge_into(n, s_intra["Central City Warp Rail Terminal"])
-    s_fr["Central City"].merge_into(n, s_intra["Central City Warp Rail Terminal"])
-    s_redtrain["Central City Warp Rail Terminal"].merge_into(
-        n, s_intra["Central City Warp Rail Terminal"]
-    )
-    s_fr["Sealane New Forest Station"].merge_into(
-        n, s_intra["Sealane New Forest Terminal"]
-    )
-    s_fr["Central City Beltway Terminal North"].merge_into(
-        n, s_intra["Central City Beltway Terminal North"]
-    )
-    s_blu["Utopia - AFK"].merge_into(n, s_intra["Utopia Anthony Fokker Transit Hub"])
-    s_fr["Utopia AFK"].merge_into(n, s_intra["Utopia Anthony Fokker Transit Hub"])
-    s_blu["Venceslo"].merge_into(n, s_intra["Venceslo Union Station"])
-    s_redtrain["Venceslo"].merge_into(n, s_intra["Venceslo Union Station"])
-    s_blu["Laclede Central"].merge_into(n, s_intra["Laclede Central"])
-    s_rlq["Laclede Central"].merge_into(n, s_intra["Laclede Central"])
-    s_blu["Vermilion"].merge_into(n, s_intra["Vermilion Victory Square"])
-    s_blu["Bakersville Grand Central"].merge_into(
-        n, s_intra["Bakersville Grand Central"]
-    )
-    s_fr["Bakersville Grand Central"].merge_into(
-        n, s_intra["Bakersville Grand Central"]
-    )
-    s_fr["Westchester Junction"].merge_into(
-        n, s_intra["Bakersville Westchester Junction - Canal Works"]
-    )
-    s_blu["Whitechapel Border"].merge_into(n, s_intra["Whitechapel Border"])
-    s_blu["Waterville Union Station"].merge_into(n, s_intra["Waterville Union Station"])
-    s_blu["Fort Yaxier Central"].merge_into(n, s_intra["Fort Yaxier Central"])
-    s_blu["Sunshine Coast Máspalmas Terminal"].merge_into(
-        n, s_intra["Sunshine Coast Máspalmas Terminal"]
-    )
-    s_blu["Murrville Central"].merge_into(n, s_intra["Murrville Central"])
-    s_blu["BirchView Central"].merge_into(n, s_intra["BirchView Central"])
-    s_rlq["Birchview Central"].merge_into(n, s_intra["BirchView Central"])
-    s_rlq["Titsensaki"].merge_into(n, s_blu["Titsensaki North City"])
-    s_rlq["East Mesa"].merge_into(n, s_intra["East Mesa M. Bubbles Station"])
-    s_rlq["Mons Pratus"].merge_into(n, s_intra["Mons Pratus Transportation Hub"])
-    s_rlq["Segville International"].merge_into(
-        n, s_intra["Segville International Airport"]
-    )
-    s_blu["Segville International"].merge_into(
-        n, s_intra["Segville International Airport"]
-    )
-    s_fr["Segville International Airport"].merge_into(
-        n, s_intra["Segville International Airport"]
-    )
-    s_rlq["Utopia Central"].merge_into(n, s_blu["Utopia Central"])
-    s_rlq["Utopia Stephenson"].merge_into(n, s_blu["Utopia Stephenson"])
-    s_rlq["Utopia IKEA"].merge_into(n, s_blu["Utopia - IKEA"])
-    s_blu["Saint Roux"].merge_into(n, s_intra["Saint Roux Gare Orsay"])
-    s_rlq["Saint Roux Gare Orsay"].merge_into(n, s_intra["Saint Roux Gare Orsay"])
-    s_nflr["Port of Porton"].merge_into(n, s_mrt["M83 U138 Porton"])
-    s_nflr["Uacam Beach"].merge_into(n, s_mrt["M87 Uacam Beach East"])
-    s_nflr["M90 Theme Park"].merge_into(n, s_mrt["M90"])
-    s_nflr["Castlehill"].merge_into(n, s_mrt["U126"])
-    s_nflr["Lilygrove Union"].merge_into(
-        n, s_mrt["ZS52 Lilygrove Union Station/Heliport"]
-    )
-    s_nflr["Dewford City Lometa"].merge_into(n, s_wzr["Dewford City Lometa Station"])
-    s_mtc["Cape Cambridge John Glenn"].merge_into(
-        n, s_nflr["Cape Cambridge John Glenn Transit Centre"]
-    )
-    s_mtc["Port Sonder"].merge_into(n, s_nflr["Port Sonder"])
-    s_mtc["Sandfield"].merge_into(n, s_nflr["Sandfield"])
-    s_mtc["Seolho Midwest"].merge_into(n, s_nflr["Seolho Midwest"])
-    s_mtc["Oceanside Bayfront"].merge_into(n, s_nflr["Oceanside Bayfront"])
-    s_mtc["Tung Wan"].merge_into(n, s_nflr["Tung Wan"])
-    s_mtc["Edwardsburg"].merge_into(n, s_nflr["Edwardsburg"])
-    s_blu["Musique"].merge_into(n, s_mrt["D11 Musique"])
-    s_blu["Elecna Bay North"].merge_into(n, s_intra["Elecna Bay North"])
-    s_rlq["Elecna Bay North"].merge_into(n, s_intra["Elecna Bay North"])
-    s_rlq["Outer Solarion"].merge_into(
-        n, s_intra["Achowalogen Takachsin Outer Solarion"]
-    )
-    s_rlq["Downtown Solarion"].merge_into(
-        n, s_intra["Achowalogen Takachsin Downtown Solarion"]
-    )
-    s_rlq["Achowalogen Takachsin Suburb"].merge_into(
-        n, s_intra["Achowalogen Takachsin Suburb"]
-    )
-    s_rlq["Downtown Achowalogen Takachsin/Covina"].merge_into(
-        n, s_intra["Achowalogen Takachsin-Covina Downtown"]
-    )
-    s_rlq["Achowalogen Takachsin Western Transportation Hub"].merge_into(
-        n, s_intra["Achowalogen Takachsin West"]
-    )
-    s_blu["Chalxior Femtoprism Airfield"].merge_into(
-        n, s_intra["Chalxior Femtoprism Airfield"]
-    )
-    s_blu["Pilmont"].merge_into(n, s_intra["Pilmont"])
-    s_blu["New Acreadium - Central District"].merge_into(
-        n, s_intra["New Acreadium Central District"]
-    )
-    s_blu["New Acreadium - Schiphol International"].merge_into(
-        n, s_intra["New Acreadium Schiphol Airport"]
-    )
-    s_blu["Antioch Union Station"].merge_into(n, s_intra["Antioch Union Station"])
-    s_rlq["Antioch"].merge_into(n, s_intra["Antioch Union Station"])
-    s_rlq["Moramoa Wyndham Street"].merge_into(n, s_blu["Moramoa Wyndham Street"])
-    s_rlq["Moramoa Central"].merge_into(n, s_blu["Moramoa Central"])
-    s_intra["Seuland"].merge_into(n, s_blu["Seuland"])
-    s_intra["Whiteley Turing Square"].merge_into(n, s_rlq["Whiteley Turing Square"])
-    s_fr["Whiteley Turing Square"].merge_into(n, s_rlq["Whiteley Turing Square"])
-    s_blu["Whiteley College Park"].merge_into(n, s_rlq["Whiteley College Park"])
-    s_rn["Kappen"].merge_into(n, s_mrt["RE16 Kappen Hauptbahnhof"])
-    s_intra["Royalston"].merge_into(n, s_mrt["V14"])
-    s_intra["Sunshine Coast Máspalmas International Airport"].merge_into(n,
-                                                                         s_blu['Sunshine Coast Máspalmas International Airport'])
-    s_blu["Tranquil Forest Central"].merge_into(n, s_fr["Tranquil Forest Central"])
-    s_intra["Tranquil Forest Central"].merge_into(n, s_fr["Tranquil Forest Central"])
-    s_blu["Sesby MRT Warptrain Museum"].merge_into(n, s_rlq["Sesby MRT Warptrain Museum"])
-    s_blu["Sesby Central"].merge_into(n, s_rlq["Sesby Central"])
-    s_blu["Airchester Central"].merge_into(n, s_rlq["Airchester Central"])
-    s_blu["Accerton"].merge_into(n, s_rlq["Accerton"])
-    s_nflr["WMI / Blackwater"].merge_into(n, s_intra["Deadbush Blackwater"])
-    s_blu["Oparia Downtown"].merge_into(n, s_intra["Oparia Downtown"])
-    s_rlq["Oparia Downtown"].merge_into(n, s_intra["Oparia Downtown"])
-    s_rn["Oparia Downtown"].merge_into(n, s_intra["Oparia Downtown"])
-    s_mrt["ZN40 Oparia Downtown"].merge_into(n, s_intra["Oparia Downtown"])
-    s_blu["Oparia LeTourneau International Airport"].merge_into(n, s_intra["Oparia LeTourneau International Airport"])
-    s_rn["Oparia LeTourneau International Airport"].merge_into(n, s_intra["Oparia LeTourneau International Airport"])
-    s_blu["Woodsdale"].merge_into(n, s_fr["Woodsdale"])
+    for station_i in n.stations:
+        station = data[str(station_i)]
+        for shared_station_i in (a.v for a in station['shared_facility']):
+            print("a")
+            if shared_station_i not in n.stations:
+                continue
+            n.stations[shared_station_i].merge_into(n, n.stations[station_i])
 
-    for station_uuid in n.stations:
-        station_json = data["rail"]["station"][station_uuid]
-        for prox_station_uuid in station_json["proximity"].get("railstation", {}):
-            if prox_station_uuid not in n.stations:
+    for station_i in n.stations:
+        station = data[str(station_i)]
+        for prox_station_i in station["proximity"]:
+            prox_station_i = int(prox_station_i)
+            if prox_station_i not in n.stations:
                 continue
             n.connect(
-                n.stations[station_uuid],
-                n.stations[prox_station_uuid],
+                n.stations[station_i],
+                n.stations[prox_station_i],
                 Connection(),
             )
 
