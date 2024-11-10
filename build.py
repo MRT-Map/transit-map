@@ -386,14 +386,14 @@ def main():
         [s_nflr["Light Society Villeside"].id],
         [s_nflr["Sansvikk Kamprad Airfield"].id, s_nflr["Glacierton"].id],
     ]
-    s_fr["New Haven"].adjacent_stations[l_fr["FR New Jerseyan"].id] = [
-        [s_fr["Boston Clapham Junction"].id],
-        [s_fr["Tung Wan Transfer"].id, s_fr["Palo Alto"].id],
-    ]
-    s_fr["Palo Alto"].adjacent_stations[l_fr["FR New Jerseyan"].id] = [
-        [s_fr["Concord"].id],
-        [s_fr["Tung Wan Transfer"].id, s_fr["New Haven"].id],
-    ]
+    # s_fr["New Haven"].adjacent_stations[l_fr["FR New Jerseyan"].id] = [
+    #     [s_fr["Boston Clapham Junction"].id],
+    #     [s_fr["Tung Wan Transfer"].id, s_fr["Palo Alto"].id],
+    # ]
+    # s_fr["Palo Alto"].adjacent_stations[l_fr["FR New Jerseyan"].id] = [
+    #     [s_fr["Concord"].id],
+    #     [s_fr["Tung Wan Transfer"].id, s_fr["New Haven"].id],
+    # ] TODO
     # s_intra["Shadowpoint Capitol Union Station"].adjacent_stations[l_intra["IR 54"].id] = [
     #     [s_intra["Shadowpoint Old Town"].id],
     #     [s_intra["Geneva Bay Hendon Road"].id, s_intra["Hendon"].id],
@@ -403,13 +403,16 @@ def main():
     #     [s_intra["New Cainport Riverside Stadium"].id, s_intra["Creeperville Haneda Airport"].id],
     # ]
 
-    for station_i in n.stations:
+    merged = {}
+    for station_i in list(n.stations.keys()):
+        if station_i in merged:
+            continue
         station = data[str(station_i)]
-        for shared_station_i in (a.v for a in station['shared_facility']):
-            print("a")
+        for shared_station_i in {merged.get(a, a) for a in station['shared_facility']}:
             if shared_station_i not in n.stations:
                 continue
             n.stations[shared_station_i].merge_into(n, n.stations[station_i])
+            merged[shared_station_i] = station_i
 
     for station_i in n.stations:
         station = data[str(station_i)]
