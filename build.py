@@ -353,7 +353,9 @@ def fr(n: Network, data: dict[str, dict]):
 def main():
     data = niquests.get(
         "https://raw.githubusercontent.com/MRT-Map/gatelogue/dist/data_no_sources.json"
-    ).json()['nodes']  # noqa: S113
+    )  # noqa: S1131
+    print(data.text[:100])
+    data = data.json()['nodes']
     n = Network()
     s_mrt = mrt(n, data)
     s_nflr, l_nflr = nflr(n, data)
