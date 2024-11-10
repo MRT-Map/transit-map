@@ -1,3 +1,4 @@
+import json
 import re
 
 import niquests
@@ -354,8 +355,7 @@ def main():
     data = niquests.get(
         "https://raw.githubusercontent.com/MRT-Map/gatelogue/dist/data_no_sources.json"
     )  # noqa: S1131
-    print(data.text[:100])
-    data = data.json()['nodes']
+    data = json.loads(data)['nodes']
     n = Network()
     s_mrt = mrt(n, data)
     s_nflr, l_nflr = nflr(n, data)
