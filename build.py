@@ -411,7 +411,7 @@ def main():
                 continue
             s.add(shared_station_i)
             yield shared_station_i
-            yield from get_shared_stations(n.stations[shared_station_i], s)
+            yield from get_shared_stations(data[shared_station_i], s)
     
     merged = []
     for station_i in list(n.stations.keys()):
