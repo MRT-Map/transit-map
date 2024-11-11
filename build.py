@@ -410,7 +410,7 @@ def main():
             if shared_station_i in s:
                 continue
             s.add(shared_station_i)
-            yield shred_station_i
+            yield shared_station_i
             yield from get_shared_stations(n.stations[shared_station_i], s)
     
     merged = []
