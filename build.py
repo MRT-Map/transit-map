@@ -403,16 +403,26 @@ def main():
     #     [s_intra["New Cainport Riverside Stadium"].id, s_intra["Creeperville Haneda Airport"].id],
     # ]
 
-    merged = {}
+    def get_shared_stations(station, s=None):
+        s = s or {station.id}
+
+        for shared_station_i in station['shared_facility']:
+            if shared_station_i in s:
+                continue
+            s.add(shared_station_i)
+            yield shred_station_i
+            yield from get_shared_stations(n.stations[shared_station_i], s)
+    
+    merged = []
     for station_i in list(n.stations.keys()):
         if station_i in merged:
             continue
         station = data[str(station_i)]
-        for shared_station_i in {merged.get(a, a) for a in station['shared_facility']}:
+        for shared_station_i in get_shared_stations(station):
             if shared_station_i not in n.stations:
                 continue
             n.stations[shared_station_i].merge_into(n, n.stations[station_i])
-            merged[shared_station_i] = station_i
+            merged.append(shared_station_i)
 
     for station_i in n.stations:
         station = data[str(station_i)]
