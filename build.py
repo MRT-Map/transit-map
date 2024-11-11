@@ -407,7 +407,7 @@ def main():
         s = s or {station['i']}
 
         for shared_station_i in station['shared_facility']:
-            if shared_station_i in s:
+            if shared_station_i in s or shared_station_i not in n.stations:
                 continue
             s.add(shared_station_i)
             yield shared_station_i
@@ -419,8 +419,6 @@ def main():
             continue
         station = data[str(station_i)]
         for shared_station_i in get_shared_stations(station):
-            if shared_station_i not in n.stations:
-                continue
             n.stations[shared_station_i].merge_into(n, n.stations[station_i])
             merged.append(shared_station_i)
 
