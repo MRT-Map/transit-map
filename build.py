@@ -418,7 +418,7 @@ def main():
         if station_i in merged:
             continue
         station = data[str(station_i)]
-        for shared_station_i in get_shared_stations(station):
+        for shared_station_i in list(get_shared_stations(station)):
             n.stations[shared_station_i].merge_into(n, n.stations[station_i])
             merged.append(shared_station_i)
 
