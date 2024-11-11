@@ -404,7 +404,7 @@ def main():
     # ]
 
     def get_shared_stations(station, s=None):
-        s = s or {station.id}
+        s = s or {station['i']}
 
         for shared_station_i in station['shared_facility']:
             if shared_station_i in s:
