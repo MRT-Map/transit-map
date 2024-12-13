@@ -1,5 +1,6 @@
+from __future__ import annotations
+
 import json
-import re
 
 import niquests
 import vector
@@ -56,44 +57,13 @@ def _connect(n: Network, company: dict, data: dict[str, dict]):
 def mrt(n: Network, data: dict[str, dict]):
     company = next(a for a in data.values() if a['type'] == "RailCompany" and a['name'] == "MRT")
 
-    col = {
-        "A": "#00FFFF",
-        "B": "#EEDB95",
-        "C": "#5E5E5E",
-        "D": "#9437FF",
-        "E": "#10D20F",
-        "F": "#0096FF",
-        # "G": "#0ff",
-        "H": "#5B7F00",
-        "I": "#FF40FF",
-        "J": "#4C250D",
-        # "K": "#0ff",
-        "L": "#9B95BC",
-        "M": "#FF8000",
-        "N": "#0433FF",
-        "O": "#021987",
-        "P": "#008E00",
-        # "Q": "#0ff",
-        "R": "#FE2E9A",
-        "S": "#FFFA28",
-        "T": "#915001",
-        "U": "#2B2C35",
-        "V": "#FF8AD8",
-        "W": "#FF0000",
-        "X": "#000000",
-        "XM": "#000000",
-        # "Y": "#0ff",
-        "Z": "#EEEEEE",
-    }
-
     for line_i in company["lines"]:
         line = data[str(line_i)]
-        colour = col.get(line["code"], "#888")
         n.add_line(
             Line(
                 id=line_i,
                 name="MRT " + line["code"],
-                colour=Colour.solid(colour),
+                colour=Colour.solid(line["colour"] or "#888"),
             )
         )
 
@@ -124,54 +94,19 @@ def mrt(n: Network, data: dict[str, dict]):
 def nflr(n: Network, data: dict[str, dict]):
     company = next(a for a in data.values() if a['type'] == "RailCompany" and a['name'] == "nFLR")
 
-    col = {
-        "1": "#c00",
-        "2": "#ffa500",
-        "3": "#fe0",
-        "4": "#987654",
-        "5": "#008000",
-        "6": "#0c0",
-        "7": "#0cc",
-        "8": "#008b8b",
-        "9": "#00c",
-        "10": "",
-        "11": "",
-        "12": "",
-        "13": "#555",
-        "14": "#aaa",
-        "15": "#000",
-        "16": "#eee",
-        "17": "#c2b280",
-        "18": "#bb9955",
-        "19": "#000080",
-        "20": "#965f46",
-        "21": "#8b3d2e",
-        "22": "#a3501e",
-        "23": "#bb8725",
-        "24": "#3d291b",
-        "N1": "#8c0",
-        "N2": "#5cf",
-        "N3": "#f5f",
-        "N4": "#fc0",
-        "AB": "",
-    }
-
     lines = {}
     for line_i in company["lines"]:
         line = data[str(line_i)]
         name = line["name"]
-        if name.startswith("N") or name == "AB":
-            colour = Colour.solid(col[name])
-        elif name.startswith("W"):
+        if name.startswith("W"):
             colour = Colour(
                 (
-                    Stroke(dashes=col[name[1:]], thickness_multiplier=1.0),
+                    Stroke(dashes=line["colour"], thickness_multiplier=1.0),
                     Stroke(dashes="#fff", thickness_multiplier=0.5),
                 )
             )
         else:
-            match = re.search(r"^(.)(\d+)(.*)$", line["name"])
-            colour = Colour.solid(col[match.group(2)])
+            colour = Colour.solid(line["colour"] or "#888")
         line = n.add_line(
             Line(id=line_i, name="nFLR " + line["code"], colour=colour)
         )
@@ -185,46 +120,15 @@ def nflr(n: Network, data: dict[str, dict]):
 def intra(n: Network, data: dict[str, dict]):
     company = next(a for a in data.values() if a['type'] == "RailCompany" and a['name'] == "IntraRail")
 
-    col = {
-        "6": ["#d16d8f"],
-        "7": ["#d16d8f", "#4ebdb8", "#2f4bb3"],
-        "15": ["#e6e630"],
-        "17": ["#4ebdb8", "#00da37"],
-        "29": ["#d98030", "#00da37", "#9a3030"],
-        "32": ["#e6e630"],
-        "34": ["#d98030", "#d3b2a2", "#9a3030"],
-        "38": ["#00da37"],
-        "40": ["#00da37"],
-        "43": ["#2f4bb3"],
-        "48": ["#d3b2a2"],
-        "49": ["#b34bd9"],
-        "50": ["#b34bd9", "#ff0000"],
-        "51": ["#ff0000"],
-        "52": ["#ff0000"],
-        "63": ["#986d4c"],
-        "64": ["#986d4c"],
-    }
-
     lines = {}
     for line_i in company["lines"]:
         line = data[str(line_i)]
-        colour = (
-            Colour.solid("#3d6edd")
-            if line["code"].startswith("MCR")
-               or line["code"].startswith("LM")
-               or line["code"].startswith("S")
-            else Colour.stroke(
-                Stroke(dash_length=8, dashes=tuple(col[line["code"]]))
-            )
-            if line["code"] in col
-            else Colour.solid("#888")
-        )
         line = n.add_line(
             Line(
                 id=line_i,
                 name="IR "
                      + line["code"].replace("<", "&lt;").replace(">", "&gt;"),
-                colour=colour,
+                colour=Colour.solid(line["colour"] or "#888"),
             )
         )
         lines[line.name] = line
@@ -239,14 +143,9 @@ def blu(n: Network, data: dict[str, dict]):
 
     for line_i in company["lines"]:
         line = data[str(line_i)]
-        colour = Colour.solid(
-            "#c01c22"
-            if line["code"].endswith("X") and line["code"][0].isdigit()
-            else "#0a7ec3"
-            if line["code"][-1].isdigit()
-            else "#0c4a9e"
-        )
-        n.add_line(Line(id=line_i, name="Blu " + line["code"], colour=colour))
+        n.add_line(Line(id=line_i, name="Blu " + line["code"], colour=Colour.solid(
+            line["colour"] or "#888"
+        )))
 
     stations = _station(n, company, data)
     _connect(n, company, data)
@@ -258,10 +157,7 @@ def rlq(n: Network, data: dict[str, dict]):
 
     for line_i in company["lines"]:
         line = data[str(line_i)]
-        colour = Colour.solid(
-            "#ff5500" if line["code"].startswith("IC") else "#ffaa00"
-        )
-        n.add_line(Line(id=line_i, name="RLQ " + line["code"], colour=colour))
+        n.add_line(Line(id=line_i, name="RLQ " + line["code"], colour=Colour.solid(line["colour"] or "#888")))
 
     stations = _station(n, company, data)
     _connect(n, company, data)
@@ -273,8 +169,7 @@ def wzr(n: Network, data: dict[str, dict]):
 
     for line_i in company["lines"]:
         line = data[str(line_i)]
-        colour = Colour.solid(line["colour"] or "#aa0000")
-        n.add_line(Line(id=line_i, name="WZR " + line["code"], colour=colour))
+        n.add_line(Line(id=line_i, name="WZR " + line["code"], colour=Colour.solid(line["colour"] or "#888")))
 
     stations = _station(n, company, data)
     _connect(n, company, data)
@@ -286,8 +181,7 @@ def mtc(n: Network, data: dict[str, dict]):
 
     for line_i in company["lines"]:
         line = data[str(line_i)]
-        colour = Colour.solid(line["colour"] or "#cc00cc")
-        n.add_line(Line(id=line_i, name="MTC " + line["code"], colour=colour))
+        n.add_line(Line(id=line_i, name="MTC " + line["code"], colour=Colour.solid(line["colour"] or "#888")))
 
     stations = _station(n, company, data)
     _connect(n, company, data)
@@ -299,8 +193,7 @@ def nsc(n: Network, data: dict[str, dict]):
 
     for line_i in company["lines"]:
         line = data[str(line_i)]
-        colour = Colour.solid(line["colour"] or "#cc0000")
-        n.add_line(Line(id=line_i, name="NSC " + line["code"], colour=colour))
+        n.add_line(Line(id=line_i, name="NSC " + line["code"], colour=Colour.solid(line["colour"] or "#888")))
 
     stations = _station(n, company, data)
     _connect(n, company, data)
@@ -312,9 +205,8 @@ def redtrain(n: Network, data: dict[str, dict]):
 
     for line_i in company["lines"]:
         line = data[str(line_i)]
-        colour = Colour.solid(line["colour"] or "#ff0000")
         n.add_line(
-            Line(id=line_i, name="RedTrain " + line["code"], colour=colour)
+            Line(id=line_i, name="RedTrain " + line["code"], colour=Colour.solid(line["colour"] or "#888"))
         )
 
     stations = _station(n, company, data)
@@ -327,8 +219,7 @@ def rn(n: Network, data: dict[str, dict]):
 
     for line_i in company["lines"]:
         line = data[str(line_i)]
-        colour = Colour.solid(line["colour"] or "#000080")
-        n.add_line(Line(id=line_i, name=line["code"], colour=colour))
+        n.add_line(Line(id=line_i, name=line["code"], colour=Colour.solid(line["colour"] or "#888")))
 
     stations = _station(n, company, data)
     _connect(n, company, data)
@@ -341,9 +232,8 @@ def fr(n: Network, data: dict[str, dict]):
     lines = {}
     for line_i in company["lines"]:
         line = data[str(line_i)]
-        colour = Colour.solid(line["colour"] or "#000080")
         line = n.add_line(
-            Line(id=line_i, name="FR " + line["code"], colour=colour)
+            Line(id=line_i, name="FR " + line["code"], colour=Colour.solid(line["colour"] or "#888"))
         )
         lines[line.name] = line
 
@@ -355,12 +245,12 @@ def fr(n: Network, data: dict[str, dict]):
 def main():
     data = niquests.get(
         "https://raw.githubusercontent.com/MRT-Map/gatelogue/dist/data_no_sources.json"
-    )  # noqa: S1131
+    )
     data = json.loads(data.text)['nodes']
     n = Network()
     mrt(n, data)
     s_nflr, l_nflr = nflr(n, data)
-    intra(n, data)
+    s_intra, l_intra = intra(n, data)
     blu(n, data)
     rlq(n, data)
     wzr(n, data)
@@ -386,14 +276,18 @@ def main():
         [s_nflr["Light Society Villeside"].id],
         [s_nflr["Sansvikk Kamprad Airfield"].id, s_nflr["Glacierton"].id],
     ]
-    # s_fr["New Haven"].adjacent_stations[l_fr["FR New Jerseyan"].id] = [
-    #     [s_fr["Boston Clapham Junction"].id],
-    #     [s_fr["Tung Wan Transfer"].id, s_fr["Palo Alto"].id],
-    # ]
-    # s_fr["Palo Alto"].adjacent_stations[l_fr["FR New Jerseyan"].id] = [
-    #     [s_fr["Concord"].id],
-    #     [s_fr["Tung Wan Transfer"].id, s_fr["New Haven"].id],
-    # ] TODO
+    s_intra["Laclede Airport Plaza"].adjacent_stations[l_intra["IR 202"].id] = [
+        [s_intra["Laclede Central"].id],
+        [s_intra["Amestris Cummins Highway"].id, s_intra["Amestris Washington Street"].id],
+    ]
+    s_fr["New Haven"].adjacent_stations[l_fr["FR New Jerseyan"].id] = [
+        [s_intra["Boston Clapham Junction"].id],
+        [s_fr["Tung Wan Transfer"].id, s_fr["Palo Alto"].id],
+    ]
+    s_fr["Palo Alto"].adjacent_stations[l_fr["FR New Jerseyan"].id] = [
+        [s_fr["Concord"].id],
+        [s_fr["Tung Wan Transfer"].id, s_fr["New Haven"].id],
+    ]
     # s_intra["Shadowpoint Capitol Union Station"].adjacent_stations[l_intra["IR 54"].id] = [
     #     [s_intra["Shadowpoint Old Town"].id],
     #     [s_intra["Geneva Bay Hendon Road"].id, s_intra["Hendon"].id],
@@ -412,7 +306,7 @@ def main():
             s.add(shared_station_i)
             yield shared_station_i
             yield from get_shared_stations(data[str(shared_station_i)], s)
-    
+
     merged = []
     for station_i in list(n.stations.keys()):
         if station_i in merged:
