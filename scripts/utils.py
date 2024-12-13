@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import vector
-from autocarter.network import Network, Connection, Station
+from autocarter.network import Connection, Network, Station
 
 
 def handle_shared_stations(data, n: Network):

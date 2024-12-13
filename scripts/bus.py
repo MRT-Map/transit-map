@@ -1,11 +1,12 @@
 from __future__ import annotations
-import vector
-from autocarter.colour import Colour, Stroke
+
+from autocarter.colour import Colour
 from autocarter.drawer import Drawer
-from autocarter.network import Network, Line, Station
+from autocarter.network import Line, Network
 from autocarter.style import Style
 
-from utils import _connect, _station, handle_shared_stations, handle_proximity
+from utils import _connect, _station, handle_proximity, handle_shared_stations
+
 
 def intra(n: Network, data: dict[str, dict]):
     company = next(a for a in data.values() if a['type'] == "BusCompany" and a['name'] == "IntraBus")
@@ -28,5 +29,5 @@ def bus(data):
     n.finalise()
 
     s = Drawer(n, Style(scale=0.075, station_dots=True)).draw()
-    with open("./bus.svg", "w") as f:
+    with open("maps/bus.svg", "w") as f:
         f.write(str(s))

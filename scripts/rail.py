@@ -1,11 +1,12 @@
 from __future__ import annotations
+
 import vector
 from autocarter.colour import Colour, Stroke
 from autocarter.drawer import Drawer
-from autocarter.network import Network, Line, Station
+from autocarter.network import Line, Network, Station
 from autocarter.style import Style
 
-from utils import _connect, _station, handle_shared_stations, handle_proximity
+from utils import _connect, _station, handle_proximity, handle_shared_stations
 
 
 def mrt(n: Network, data: dict[str, dict]):
@@ -244,5 +245,5 @@ def rail(data):
     n.finalise()
 
     s = Drawer(n, Style(scale=0.1, station_dots=True)).draw()
-    with open("./rail.svg", "w") as f:
+    with open("maps/rail.svg", "w") as f:
         f.write(str(s))

@@ -18,7 +18,7 @@ jobs:
         with:
           python-version: '3.12' 
       - run: pip install -Ur requirements.txt
-      - run: python build.py
+      - run: python scripts/build.py
       - run: echo "message=update @ $(date +%Y%m%dT%H:%M:%S%Z)" >> "$GITHUB_ENV"
       - uses: EndBug/add-and-commit@v9
         with:
