@@ -19,10 +19,22 @@ def intra(n: Network, data: dict[str, dict]):
     _connect(n, company, data)
     return stations
 
+def ccc(n: Network, data: dict[str, dict]):
+    company = next(a for a in data.values() if a['type'] == "BusCompany" and a['name'] == "Caravacan Caravan Company")
+
+    for line_i in company["lines"]:
+        line = data[str(line_i)]
+        n.add_line(Line(id=line_i, name="CCC " + line["code"], colour=Colour.solid(line["colour"] or "#800")))
+
+    stations = _station(n, company, data)
+    _connect(n, company, data)
+    return stations
+
 
 def bus(data):
     n = Network()
     intra(n, data)
+    ccc(n, data)
 
     handle_shared_stations(data, n)
     handle_proximity(data, n)

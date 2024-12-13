@@ -41,12 +41,23 @@ def alq(n: Network, data: dict[str, dict]):
     _connect(n, company, data)
     return stations
 
+def cfc(n: Network, data: dict[str, dict]):
+    company = next(a for a in data.values() if a['type'] == "SeaCompany" and a['name'] == "Caravacan Floaty Company")
+
+    for line_i in company["lines"]:
+        line = data[str(line_i)]
+        n.add_line(Line(id=line_i, name="CFC " + line["code"], colour=Colour.solid(line["colour"] or "#800")))
+
+    stations = _station(n, company, data)
+    _connect(n, company, data)
+    return stations
 
 def sea(data):
     n = Network()
     intra(n, data)
     wzf(n, data)
     alq(n, data)
+    cfc(n, data)
 
     handle_shared_stations(data, n)
     handle_proximity(data, n)
