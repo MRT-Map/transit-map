@@ -43,6 +43,8 @@ def _station(n: Network, company: dict, data: dict[str, dict]):
     stations = {}
     for station_i in (company["stations" if "stations" in company else "stops"]):
         station = data[str(station_i)]
+        if station["world"] is None or station["world"] != "New":
+            continue
         coordinates = station["coordinates"]
         if coordinates is None:
             print("No coords", company['name'], station["name"])  # noqa: T201
