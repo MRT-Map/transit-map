@@ -4,7 +4,6 @@ from autocarter.colour import Colour
 from autocarter.drawer import Drawer
 from autocarter.network import Line, Network
 from autocarter.style import Style
-
 from utils import _connect, _station, handle_proximity, handle_shared_stations
 
 
@@ -30,11 +29,23 @@ def ccc(n: Network, data: dict[str, dict]):
     _connect(n, company, data)
     return stations
 
+def sb(n: Network, data: dict[str, dict]):
+    company = next(a for a in data.values() if a['type'] == "BusCompany" and a['name'] == "Seabeast Buses")
+
+    for line_i in company["lines"]:
+        line = data[str(line_i)]
+        n.add_line(Line(id=line_i, name="SeaBeast " + line["code"], colour=Colour.solid(line["colour"] or "#333")))
+
+    stations = _station(n, company, data)
+    _connect(n, company, data)
+    return stations
+
 
 def bus(data):
     n = Network()
     intra(n, data)
     ccc(n, data)
+    sb(n, data)
 
     handle_shared_stations(data, n)
     handle_proximity(data, n)

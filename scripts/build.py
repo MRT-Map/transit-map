@@ -3,7 +3,6 @@ from __future__ import annotations
 import json
 
 import niquests
-
 from bus import bus
 from rail import rail
 from sea import sea

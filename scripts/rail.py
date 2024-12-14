@@ -5,7 +5,6 @@ from autocarter.colour import Colour, Stroke
 from autocarter.drawer import Drawer
 from autocarter.network import Line, Network, Station
 from autocarter.style import Style
-
 from utils import _connect, _station, handle_proximity, handle_shared_stations
 
 
@@ -180,6 +179,17 @@ def rn(n: Network, data: dict[str, dict]):
     _connect(n, company, data)
     return stations
 
+def sb(n: Network, data: dict[str, dict]):
+    company = next(a for a in data.values() if a['type'] == "RailCompany" and a['name'] == "Seabeast Rail")
+
+    for line_i in company["lines"]:
+        line = data[str(line_i)]
+        n.add_line(Line(id=line_i, name=line["code"], colour=Colour.solid(line["colour"] or "#333")))
+
+    stations = _station(n, company, data)
+    _connect(n, company, data)
+    return stations
+
 
 def fr(n: Network, data: dict[str, dict]):
     company = next(a for a in data.values() if a['type'] == "RailCompany" and a['name'] == "Fred Rail")
@@ -210,6 +220,7 @@ def rail(data):
     rn(n, data)
     s_fr, l_fr = fr(n, data)
     redtrain(n, data)
+    sb(n, data)
 
     s_nflr["Deadbush Karaj Expo"].adjacent_stations[l_nflr["nFLR R5A"].id] = [
         [s_nflr["Deadbush Works"].id],

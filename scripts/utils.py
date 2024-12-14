@@ -47,7 +47,7 @@ def _station(n: Network, company: dict, data: dict[str, dict]):
             continue
         coordinates = station["coordinates"]
         if coordinates is None:
-            print("No coords", company['name'], station["name"])  # noqa: T201
+            print("No coords", company['name'], station["name"])
             continue
         if station["name"] is None:
             continue
@@ -69,7 +69,7 @@ def _connect(n: Network, company: dict, data: dict[str, dict]):
             continue
         station = data[str(station_i)]
         if not station["connections"]:
-            print("No conns", company['name'], station["name"])  # noqa: T201
+            print("No conns", company['name'], station["name"])
         for conn_station_i, connections in station["connections"].items():
             conn_station_i = int(conn_station_i)
             if (
