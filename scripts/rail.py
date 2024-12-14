@@ -184,7 +184,7 @@ def sb(n: Network, data: dict[str, dict]):
 
     for line_i in company["lines"]:
         line = data[str(line_i)]
-        n.add_line(Line(id=line_i, name=line["code"], colour=Colour.solid(line["colour"] or "#333")))
+        n.add_line(Line(id=line_i, name="Seabeast" + line["code"], colour=Colour.solid(line["colour"] or "#333")))
 
     stations = _station(n, company, data)
     _connect(n, company, data)
