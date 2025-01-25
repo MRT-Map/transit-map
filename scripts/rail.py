@@ -255,18 +255,19 @@ def rail(data):
         [s_intra["UCWT International Airport East"].id, s_fr["Danielston Paisley Place Transportation Center"].id],
     ]
     s_intra["UCWT International Airport East"].adjacent_stations[s_intra["IR 2X"].id] = [
-        [s_intra["Formosa Northern"].id, s_fr["Danielston Paisley Place Transportation Center"].id],
+        [s_intra["Formosa Northern"].id, s_intra["Danielston Paisley Place Transportation Center"].id],
+        [s_intra["Sealane Central"].id],
     ]
     s_intra["Central City Warp Rail Terminal"].adjacent_stations[s_intra["IR 2X"].id] = [
         [s_intra["Central City Beltway Terminal North"].id],
-        [s_intra["Rochshire"].id, s_fr["Achowalogen Takachsin-Covina International Airport"].id],
+        [s_intra["Rochshire"].id, s_intra["Achowalogen Takachsin-Covina International Airport"].id],
     ]
     s_intra["Achowalogen Takachsin-Covina International Airport"].adjacent_stations[s_intra["IR 2X"].id] = [
         [s_intra["Central City Warp Rail Terminal"].id, s_intra["Rochshire"].id],
-        [s_intra["Woodsbane"].id, s_fr["Siletz Salvador Station"].id],
+        [s_intra["Woodsbane"].id, s_intra["Siletz Salvador Station"].id],
     ]
     s_intra["Siletz Salvador Station"].adjacent_stations[s_intra["IR 2X"].id] = [
-        [s_intra["Woodsbane"].id, s_fr["Achowalogen Takachsin-Covina International Airport"].id], []
+        [s_intra["Woodsbane"].id, s_intra["Achowalogen Takachsin-Covina International Airport"].id], []
     ]
 
     handle_shared_stations(data, n)
