@@ -252,7 +252,7 @@ def rail(data):
     ]
     s_intra["Formosa Northern"].adjacent_stations[s_intra["IR 2X"].id] = [
         [s_intra["Kenthurst Aerodrome"].id],
-        [s_intra["UCWT International Airport East"].id, s_fr["Danielston Paisley Place Transportation Center"].id],
+        [s_intra["UCWT International Airport East"].id, s_intra["Danielston Paisley Place Transportation Center"].id],
     ]
     s_intra["UCWT International Airport East"].adjacent_stations[s_intra["IR 2X"].id] = [
         [s_intra["Formosa Northern"].id, s_intra["Danielston Paisley Place Transportation Center"].id],
