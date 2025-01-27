@@ -16,7 +16,7 @@ def air(data):
             continue
         if airport['world'] == "Old":
             x, y = airport['coordinates']
-            airport['coordinates'] = [x+30000-3200, y+30000+3200+1000]
+            airport['coordinates'] = [x+30000-3200, y-30000-3200-1000]
 
         n.add_station(
             Station(
