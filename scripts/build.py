@@ -5,6 +5,7 @@ import json
 import niquests
 from bus import bus
 from rail import rail
+from air import air
 from sea import sea
 
 if __name__ == "__main__":
@@ -13,6 +14,8 @@ if __name__ == "__main__":
     )
     data = json.loads(data.text)['nodes']
 
+    air(data)
     rail(data)
     sea(data)
     bus(data)
+
