@@ -12,8 +12,11 @@ def air(data):
     n = Network()
 
     for airport in (a for a in data.values() if a["type"] == "AirAirport"):
-        if airport["coordinates"] is None or airport["world"] == "Old":
+        if airport["coordinates"] is None:
             continue
+        if airport['world'] == "Old":
+            x, y = airport['coordinates']
+            airport['coordinates'] = [x+30000-3200, y+30000+3200+1000]
 
         n.add_station(
             Station(
