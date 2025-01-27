@@ -57,6 +57,6 @@ def air(data):
     handle_proximity(data, n)
     n.finalise()
 
-    s = Drawer(n, Style(scale=0.075, station_dots=True)).draw()
+    s = Drawer(n, Style(scale=0.075, station_dots=True, stiffness=0.001)).draw()
     with open("maps/air.svg", "w") as f:
         f.write(str(s))
