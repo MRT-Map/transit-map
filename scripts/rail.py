@@ -52,7 +52,7 @@ def nflr(n: Network, data: dict[str, dict]):
     for line_i in company["lines"]:
         line = data[str(line_i)]
         name = line["name"]
-        if name.startswith("W"):
+        if name.startswith("W") or name.endswith("Rapid"):
             colour = Colour(
                 (
                     Stroke(dashes=line["colour"], thickness_multiplier=1.0),
