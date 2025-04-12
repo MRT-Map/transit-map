@@ -206,6 +206,36 @@ def fr(n: Network, data: dict[str, dict]):
     _connect(n, company, data)
     return stations, lines
 
+def seat(n: Network, data: dict[str, dict]):
+    company = next(a for a in data.values() if a['type'] == "RailCompany" and a['name'] == "SEAT")
+
+    lines = {}
+    for line_i in company["lines"]:
+        line = data[str(line_i)]
+        line = n.add_line(
+            Line(id=line_i, name="SEAT " + line["code"], colour=Colour.solid(line["colour"] or "#888"))
+        )
+        lines[line.name] = line
+
+    stations = _station(n, company, data)
+    _connect(n, company, data)
+    return stations, lines
+
+def pac(n: Network, data: dict[str, dict]):
+    company = next(a for a in data.values() if a['type'] == "RailCompany" and a['name'] == "Pacifica")
+
+    lines = {}
+    for line_i in company["lines"]:
+        line = data[str(line_i)]
+        line = n.add_line(
+            Line(id=line_i, name="Pac " + line["code"], colour=Colour.solid(line["colour"] or "#888"))
+        )
+        lines[line.name] = line
+
+    stations = _station(n, company, data)
+    _connect(n, company, data)
+    return stations, lines
+
 
 def rail(data):
     n = Network()
@@ -221,6 +251,8 @@ def rail(data):
     s_fr, l_fr = fr(n, data)
     redtrain(n, data)
     sb(n, data)
+    seat(n, data)
+    pac(n, data)
 
     s_nflr["Deadbush Karaj Expo"].adjacent_stations[l_nflr["nFLR R5A"].id] = [
         [s_nflr["Deadbush Works"].id],
