@@ -252,19 +252,17 @@ def nrn(n: Network, data: dict[str, dict]):
     return stations, lines
 
 def metros(n: Network, data: dict[str, dict]):
-    company = next(a for a in data.values() if a['type'] == "RailCompany" and a['local'])
+    companies = (a for a in data.values() if a['type'] == "RailCompany" and a['local'])
 
-    lines = {}
-    for line_i in company["lines"]:
-        line = data[str(line_i)]
-        line = n.add_line(
-            Line(id=line_i, name=line["code"], colour=Colour.solid(line["colour"] or "#888", 0.5))
-        )
-        lines[line.name] = line
+    for company in companies:
+        for line_i in company["lines"]:
+            line = data[str(line_i)]
+            n.add_line(
+                Line(id=line_i, name=line["code"], colour=Colour.solid(line["colour"] or "#888", 0.5))
+            )
 
-    stations = _station(n, company, data)
-    _connect(n, company, data)
-    return stations, lines
+        _station(n, company, data)
+        _connect(n, company, data)
 
 
 def rail(data):
