@@ -88,4 +88,4 @@ def _connect(n: Network, company: dict, data: dict[str, dict]):
                     n.stations[conn_station_i],
                     n.lines[connection["line"]],
                 )
-        visited_stations.append(station)
+        visited_stations.append(station_i)
