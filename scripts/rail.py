@@ -235,6 +235,21 @@ def pac(n: Network, data: dict[str, dict]):
     stations = _station(n, company, data)
     _connect(n, company, data)
     return stations, lines
+    
+def nrn(n: Network, data: dict[str, dict]):
+    company = next(a for a in data.values() if a['type'] == "RailCompany" and a['name'] == "Nobody's Rail Network")
+
+    lines = {}
+    for line_i in company["lines"]:
+        line = data[str(line_i)]
+        line = n.add_line(
+            Line(id=line_i, name="NRN " + line["code"], colour=Colour.solid(line["colour"] or "#888"))
+        )
+        lines[line.name] = line
+
+    stations = _station(n, company, data)
+    _connect(n, company, data)
+    return stations, lines
 
 
 def rail(data):
@@ -253,6 +268,7 @@ def rail(data):
     sb(n, data)
     seat(n, data)
     pac(n, data)
+    nrn(n, data)
 
     s_nflr["Deadbush Karaj Expo"].adjacent_stations[l_nflr["nFLR R5A"].id] = [
         [s_nflr["Deadbush Works"].id],
