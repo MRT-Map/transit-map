@@ -254,15 +254,22 @@ def nrn(n: Network, data: dict[str, dict]):
 def metros(n: Network, data: dict[str, dict]):
     companies = (a for a in data.values() if a['type'] == "RailCompany" and a['local'])
 
+    lines_all = {}
+    stations_all = {}
     for company in companies:
+        lines = {}
         for line_i in company["lines"]:
             line = data[str(line_i)]
-            n.add_line(
+            line = n.add_line(
                 Line(id=line_i, name=line["code"], colour=Colour.solid(line["colour"] or "#888", 0.5))
             )
+            lines[line.name] = line
 
-        _station(n, company, data)
+        stations = _station(n, company, data)
         _connect(n, company, data)
+        lines_all[company['name']] = lines
+        stations_all[company['name']] = stations
+    return stations_all, lines_all
 
 
 def rail(data):
@@ -282,7 +289,7 @@ def rail(data):
     seat(n, data)
     pac(n, data)
     nrn(n, data)
-    metros(n, data)
+    sm, lm = metros(n, data)
 
     s_nflr["Deadbush Karaj Expo"].adjacent_stations[l_nflr["nFLR R5A"].id] = [
         [s_nflr["Deadbush Works"].id],
@@ -330,6 +337,11 @@ def rail(data):
     ]
     s_intra["Siletz Salvador Station"].adjacent_stations[l_intra["IR 2X"].id] = [
         [s_intra["Woodsbane"].id, s_intra["Achowalogen Takachsin-Covina International Airport"].id], []
+    ]
+    s_flrk = sm["FLR Kazeshima/Shui Chau"]
+    l_flrk = lm["FLR Kazeshima/Shui Chau"]
+    s_flrk["Ho Kok"].adjacent_stations[l_flrk["C1"].id] = [
+        [s_flrk["Ho Kok West"].id, s_flrk["Sha Tsui"].id], []
     ]
 
     handle_shared_stations(data, n)
