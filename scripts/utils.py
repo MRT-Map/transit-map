@@ -29,6 +29,10 @@ def handle_proximity(data, n: Network):
     for station_i in n.stations:
         station = data[str(station_i)]
         for prox_station_i in station["proximity"]:
+            prox_station = data[prox_station_i]
+            if data[str(station['company'])]['local'] and data[str(prox_station['company'])]['local']:
+                continue
+
             prox_station_i = int(prox_station_i)
             if prox_station_i not in n.stations:
                 continue
