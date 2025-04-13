@@ -251,14 +251,14 @@ def nrn(n: Network, data: dict[str, dict]):
     _connect(n, company, data)
     return stations, lines
 
-def flrk(n: Network, data: dict[str, dict]):
-    company = next(a for a in data.values() if a['type'] == "RailCompany" and a['name'] == "FLR Kazeshima/Shui Chau")
+def metros(n: Network, data: dict[str, dict]):
+    company = next(a for a in data.values() if a['type'] == "RailCompany" and a['local'])
 
     lines = {}
     for line_i in company["lines"]:
         line = data[str(line_i)]
         line = n.add_line(
-            Line(id=line_i, name="FLR " + line["code"], colour=Colour.solid(line["colour"] or "#888", 0.5))
+            Line(id=line_i, name=line["code"], colour=Colour.solid(line["colour"] or "#888", 0.5))
         )
         lines[line.name] = line
 
@@ -284,7 +284,7 @@ def rail(data):
     seat(n, data)
     pac(n, data)
     nrn(n, data)
-    flrk(n, data)
+    metros(n, data)
 
     s_nflr["Deadbush Karaj Expo"].adjacent_stations[l_nflr["nFLR R5A"].id] = [
         [s_nflr["Deadbush Works"].id],
