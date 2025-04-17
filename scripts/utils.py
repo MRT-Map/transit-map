@@ -6,9 +6,9 @@ from autocarter.network import Connection, Network, Station
 
 def handle_shared_stations(data, n: Network):
     def get_shared_stations(station, s=None):
-        s = s or {station['i']}
+        s = s or {station["i"]}
 
-        for shared_station_i in station['shared_facility']:
+        for shared_station_i in station["shared_facility"]:
             if shared_station_i in s or shared_station_i not in n.stations:
                 continue
             s.add(shared_station_i)
@@ -33,8 +33,13 @@ def handle_proximity(data, n: Network):
             prox_station_i = int(prox_station_i)
             if prox_station_i not in n.stations:
                 continue
-
-            if 'company' in station and data[str(station['company'])]['local'] and 'company' in prox_station and data[str(prox_station['company'])]['local']:
+            if (
+                not station["proximity"][str(prox_station_i)]["explicit"]
+                and "company" in station
+                and data[str(station["company"])]["local"]
+                and "company" in prox_station
+                and data[str(prox_station["company"])]["local"]
+            ):
                 continue
 
             n.connect(
@@ -46,13 +51,13 @@ def handle_proximity(data, n: Network):
 
 def _station(n: Network, company: dict, data: dict[str, dict]):
     stations = {}
-    for station_i in (company["stations" if "stations" in company else "stops"]):
+    for station_i in company["stations" if "stations" in company else "stops"]:
         station = data[str(station_i)]
         if station["world"] is None or station["world"] != "New":
             continue
         coordinates = station["coordinates"]
         if coordinates is None:
-            print("No coords", company['name'], station["name"])
+            print("No coords", company["name"], station["name"])
             continue
         if station["name"] is None:
             continue
@@ -69,18 +74,15 @@ def _station(n: Network, company: dict, data: dict[str, dict]):
 
 def _connect(n: Network, company: dict, data: dict[str, dict]):
     visited_stations = []
-    for station_i in (company["stations" if "stations" in company else "stops"]):
+    for station_i in company["stations" if "stations" in company else "stops"]:
         if station_i not in n.stations:
             continue
         station = data[str(station_i)]
         if not station["connections"]:
-            print("No conns", company['name'], station["name"])
+            print("No conns", company["name"], station["name"])
         for conn_station_i, connections in station["connections"].items():
             conn_station_i = int(conn_station_i)
-            if (
-                    conn_station_i in visited_stations
-                    or conn_station_i not in n.stations
-            ):
+            if conn_station_i in visited_stations or conn_station_i not in n.stations:
                 continue
             for connection in connections:
                 n.connect(
