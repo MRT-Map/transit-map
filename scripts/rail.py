@@ -343,6 +343,11 @@ def rail(data):
     s_flrk["Ho Kok"].adjacent_stations[l_flrk["C1"].id] = [
         [s_flrk["Ho Kok West"].id, s_flrk["Sha Tsui"].id], []
     ]
+    s_nps = sm["New Prubourne Subway"]
+    l_nps = lm["New Prubourne Subway"]
+    s_nps["Evergreen Parkway"].adjacent_stations[l_nps["B"].id] = [
+        [s_nps["Wuster Drive"].id, s_nps["Penn Island-Zoo"]], []
+    ]
 
     handle_shared_stations(data, n)
     handle_proximity(data, n)
