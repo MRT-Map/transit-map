@@ -5,8 +5,7 @@ from autocarter.colour import Colour, Stroke
 from autocarter.drawer import Drawer
 from autocarter.network import Line, Network, Station
 from autocarter.style import Style
-from gatelogue_types import GatelogueData, RailCompany, RailLine, GatelogueDataNS, RailCompanyNS, RailLineNS
-
+from gatelogue_types import GatelogueDataNS, RailCompanyNS, RailLineNS
 from utils import _connect, _station, handle_proximity, handle_shared_stations
 
 
@@ -63,10 +62,10 @@ def nflr(n: Network, data: GatelogueDataNS):
             )
         else:
             colour = Colour.solid(line.colour or "#888")
-        line = n.add_line(
+        line2 = n.add_line(
             Line(id=line_i, name="nFLR " + line.code, colour=colour)
         )
-        lines[line.name] = line
+        lines[line2.name] = line2
 
     stations = _station(n, company, data)
     _connect(n, company, data)
@@ -79,7 +78,7 @@ def intra(n: Network, data: GatelogueDataNS):
     lines = {}
     for line_i in company.lines:
         line: RailLineNS = data[line_i]
-        line = n.add_line(
+        line2 = n.add_line(
             Line(
                 id=line_i,
                 name="IR "
@@ -87,7 +86,7 @@ def intra(n: Network, data: GatelogueDataNS):
                 colour=Colour.solid(line.colour or "#888"),
             )
         )
-        lines[line.name] = line
+        lines[line2.name] = line2
 
     stations = _station(n, company, data)
     _connect(n, company, data)
@@ -200,10 +199,10 @@ def fr(n: Network, data: GatelogueDataNS):
     lines = {}
     for line_i in company.lines:
         line: RailLineNS = data[line_i]
-        line = n.add_line(
+        line2 = n.add_line(
             Line(id=line_i, name="FR " + line.code, colour=Colour.solid(line.colour or "#888"))
         )
-        lines[line.name] = line
+        lines[line2.name] = line2
 
     stations = _station(n, company, data)
     _connect(n, company, data)
@@ -216,10 +215,10 @@ def seat(n: Network, data: GatelogueDataNS):
     lines = {}
     for line_i in company.lines:
         line: RailLineNS = data[line_i]
-        line = n.add_line(
+        line2 = n.add_line(
             Line(id=line_i, name="SEAT " + line.code, colour=Colour.solid(line.colour or "#888"))
         )
-        lines[line.name] = line
+        lines[line2.name] = line2
 
     stations = _station(n, company, data)
     _connect(n, company, data)
@@ -232,10 +231,10 @@ def pac(n: Network, data: GatelogueDataNS):
     lines = {}
     for line_i in company.lines:
         line: RailLineNS = data[line_i]
-        line = n.add_line(
+        line2 = n.add_line(
             Line(id=line_i, name="Pac " + line.code, colour=Colour.solid(line.colour or "#888"))
         )
-        lines[line.name] = line
+        lines[line2.name] = line2
 
     stations = _station(n, company, data)
     _connect(n, company, data)
@@ -248,10 +247,10 @@ def nrn(n: Network, data: GatelogueDataNS):
     lines = {}
     for line_i in company.lines:
         line: RailLineNS = data[line_i]
-        line = n.add_line(
+        line2 = n.add_line(
             Line(id=line_i, name="NRN " + line.code, colour=Colour.solid(line.colour or "#888"))
         )
-        lines[line.name] = line
+        lines[line2.name] = line2
 
     stations = _station(n, company, data)
     _connect(n, company, data)
@@ -267,10 +266,10 @@ def metros(n: Network, data: GatelogueDataNS):
         lines = {}
         for line_i in company.lines:
             line: RailLineNS = data[line_i]
-            line = n.add_line(
+            line2 = n.add_line(
                 Line(id=line_i, name=line.code, colour=Colour.solid(line.colour or "#888", 0.5))
             )
-            lines[line.name] = line
+            lines[line2.name] = line2
 
         stations = _station(n, company, data)
         _connect(n, company, data)

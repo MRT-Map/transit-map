@@ -5,8 +5,7 @@ from autocarter.colour import Colour
 from autocarter.drawer import Drawer
 from autocarter.network import Line, Network, Station
 from autocarter.style import Style
-from gatelogue_types import GatelogueDataNS, AirAirportNS, AirAirlineNS, AirFlightNS
-
+from gatelogue_types import AirAirlineNS, AirAirportNS, AirFlightNS, GatelogueDataNS
 from utils import handle_proximity, handle_shared_stations
 
 

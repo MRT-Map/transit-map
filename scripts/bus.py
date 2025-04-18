@@ -4,8 +4,7 @@ from autocarter.colour import Colour
 from autocarter.drawer import Drawer
 from autocarter.network import Line, Network
 from autocarter.style import Style
-from gatelogue_types import GatelogueData, BusCompany, BusCompanyNS, GatelogueDataNS, RailLineNS, BusLineNS
-
+from gatelogue_types import BusCompanyNS, BusLineNS, GatelogueDataNS
 from utils import _connect, _station, handle_proximity, handle_shared_stations
 
 

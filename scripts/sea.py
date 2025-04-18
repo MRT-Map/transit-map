@@ -4,8 +4,7 @@ from autocarter.colour import Colour
 from autocarter.drawer import Drawer
 from autocarter.network import Line, Network
 from autocarter.style import Style
-from gatelogue_types import GatelogueData, SeaCompany, GatelogueDataNS, SeaCompanyNS, SeaLineNS
-
+from gatelogue_types import GatelogueDataNS, SeaCompanyNS, SeaLineNS
 from utils import _connect, _station, handle_proximity, handle_shared_stations
 
 

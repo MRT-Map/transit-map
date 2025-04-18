@@ -1,15 +1,25 @@
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 import vector
 from autocarter.network import Connection, Network, Station
-from gatelogue_types import GatelogueData, RailCompany, BusCompany, SeaCompany, GatelogueDataNS, RailCompanyNS, BusCompanyNS, \
-    SeaCompanyNS, RailStation, BusStopNS, SeaStopNS, RailStationNS
+
+if TYPE_CHECKING:
+    from gatelogue_types import (
+        BusCompanyNS,
+        BusStopNS,
+        GatelogueDataNS,
+        RailCompanyNS,
+        RailStationNS,
+        SeaCompanyNS,
+        SeaStopNS,
+    )
 
 
 def handle_shared_stations(data: GatelogueDataNS, n: Network):
-    def get_shared_stations(station: RailCompanyNS | BusCompanyNS | SeaCompanyNS, s=None):
+    def get_shared_stations(station: RailStationNS | BusStopNS | SeaStopNS, s=None):
         s = s or {station.i}
-
         for shared_station_i in station.shared_facility:
             if shared_station_i in s or shared_station_i not in n.stations:
                 continue
@@ -63,14 +73,14 @@ def _station(n: Network, company: RailCompanyNS | BusCompanyNS | SeaCompanyNS, d
             continue
         if station.name is None:
             continue
-        station = n.add_station(
+        station2 = n.add_station(
             Station(
                 id=station_i,
                 name=station.name.replace("&", "&amp;"),
                 coordinates=vector.obj(x=coordinates[0], y=coordinates[1]),
             )
         )
-        stations[station.name] = station
+        stations[station2.name] = station2
     return stations
 
 
