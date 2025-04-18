@@ -5,35 +5,37 @@ from autocarter.colour import Colour, Stroke
 from autocarter.drawer import Drawer
 from autocarter.network import Line, Network, Station
 from autocarter.style import Style
+from gatelogue_types import GatelogueData, RailCompany, RailLine, GatelogueDataNS, RailCompanyNS, RailLineNS
+
 from utils import _connect, _station, handle_proximity, handle_shared_stations
 
 
-def mrt(n: Network, data: dict[str, dict]):
-    company = next(a for a in data.values() if a['type'] == "RailCompany" and a['name'] == "MRT")
+def mrt(n: Network, data: GatelogueDataNS):
+    company = next(a for a in data if isinstance(a, RailCompanyNS) and a.name == "MRT")
 
-    for line_i in company["lines"]:
-        line = data[str(line_i)]
+    for line_i in company.lines:
+        line: RailLineNS = data[line_i]
         n.add_line(
             Line(
                 id=line_i,
-                name="MRT " + line["code"],
-                colour=Colour.solid(line["colour"] or "#888"),
+                name="MRT " + line.code,
+                colour=Colour.solid(line.colour or "#888"),
             )
         )
 
     stations = {}
-    for station_i in company["stations"]:
-        station = data[str(station_i)]
-        if station["world"] == "Old" or not station["connections"]:
+    for station_i in company.stations:
+        station = data[station_i]
+        if station.world == "Old" or not station.connections:
             continue
-        coordinates = station["coordinates"] or [0, 0]
+        coordinates = station.coordinates or [0, 0]
         station = n.add_station(
             Station(
                 id=station_i,
                 name=(
-                        " ".join(sorted(station["codes"]))
+                        " ".join(sorted(station.codes))
                         + " "
-                        + (station["name"] or "")
+                        + (station.name or "")
                 ).strip(),
                 coordinates=vector.obj(x=coordinates[0], y=coordinates[1]),
             )
@@ -45,24 +47,24 @@ def mrt(n: Network, data: dict[str, dict]):
     return stations
 
 
-def nflr(n: Network, data: dict[str, dict]):
-    company = next(a for a in data.values() if a['type'] == "RailCompany" and a['name'] == "nFLR")
+def nflr(n: Network, data: GatelogueDataNS):
+    company = next(a for a in data if isinstance(a, RailCompanyNS) and a.name == "nFLR")
 
     lines = {}
-    for line_i in company["lines"]:
-        line = data[str(line_i)]
-        name = line["name"]
+    for line_i in company.lines:
+        line: RailLineNS = data[line_i]
+        name = line.name
         if name.startswith("W") or name.endswith("Rapid"):
             colour = Colour(
                 (
-                    Stroke(dashes=line["colour"], thickness_multiplier=1.0),
+                    Stroke(dashes=line.colour, thickness_multiplier=1.0),
                     Stroke(dashes="#fff", thickness_multiplier=0.5),
                 )
             )
         else:
-            colour = Colour.solid(line["colour"] or "#888")
+            colour = Colour.solid(line.colour or "#888")
         line = n.add_line(
-            Line(id=line_i, name="nFLR " + line["code"], colour=colour)
+            Line(id=line_i, name="nFLR " + line.code, colour=colour)
         )
         lines[line.name] = line
 
@@ -71,18 +73,18 @@ def nflr(n: Network, data: dict[str, dict]):
     return stations, lines
 
 
-def intra(n: Network, data: dict[str, dict]):
-    company = next(a for a in data.values() if a['type'] == "RailCompany" and a['name'] == "IntraRail")
+def intra(n: Network, data: GatelogueDataNS):
+    company = next(a for a in data if isinstance(a, RailCompanyNS) and a.name == "IntraRail")
 
     lines = {}
-    for line_i in company["lines"]:
-        line = data[str(line_i)]
+    for line_i in company.lines:
+        line: RailLineNS = data[line_i]
         line = n.add_line(
             Line(
                 id=line_i,
                 name="IR "
-                     + line["code"].replace("<", "&lt;").replace(">", "&gt;"),
-                colour=Colour.solid(line["colour"] or "#888"),
+                     + line.code.replace("<", "&lt;").replace(">", "&gt;"),
+                colour=Colour.solid(line.colour or "#888"),
             )
         )
         lines[line.name] = line
@@ -92,13 +94,13 @@ def intra(n: Network, data: dict[str, dict]):
     return stations, lines
 
 
-def blu(n: Network, data: dict[str, dict]):
-    company = next(a for a in data.values() if a['type'] == "RailCompany" and a['name'] == "BluRail")
+def blu(n: Network, data: GatelogueDataNS):
+    company = next(a for a in data if isinstance(a, RailCompanyNS) and a.name == "BluRail")
 
-    for line_i in company["lines"]:
-        line = data[str(line_i)]
-        n.add_line(Line(id=line_i, name="Blu " + line["code"], colour=Colour.solid(
-            line["colour"] or "#888"
+    for line_i in company.lines:
+        line: RailLineNS = data[line_i]
+        n.add_line(Line(id=line_i, name="Blu " + line.code, colour=Colour.solid(
+            line.colour or "#888"
         )))
 
     stations = _station(n, company, data)
@@ -106,61 +108,61 @@ def blu(n: Network, data: dict[str, dict]):
     return stations
 
 
-def rlq(n: Network, data: dict[str, dict]):
-    company = next(a for a in data.values() if a['type'] == "RailCompany" and a['name'] == "RaiLinQ")
+def rlq(n: Network, data: GatelogueDataNS):
+    company = next(a for a in data if isinstance(a, RailCompanyNS) and a.name == "RaiLinQ")
 
-    for line_i in company["lines"]:
-        line = data[str(line_i)]
-        n.add_line(Line(id=line_i, name="RLQ " + line["code"], colour=Colour.solid(line["colour"] or "#888")))
-
-    stations = _station(n, company, data)
-    _connect(n, company, data)
-    return stations
-
-
-def wzr(n: Network, data: dict[str, dict]):
-    company = next(a for a in data.values() if a['type'] == "RailCompany" and a['name'] == "West Zeta Rail")
-
-    for line_i in company["lines"]:
-        line = data[str(line_i)]
-        n.add_line(Line(id=line_i, name="WZR " + line["code"], colour=Colour.solid(line["colour"] or "#888")))
+    for line_i in company.lines:
+        line: RailLineNS = data[line_i]
+        n.add_line(Line(id=line_i, name="RLQ " + line.code, colour=Colour.solid(line.colour or "#888")))
 
     stations = _station(n, company, data)
     _connect(n, company, data)
     return stations
 
 
-def mtc(n: Network, data: dict[str, dict]):
-    company = next(a for a in data.values() if a['type'] == "RailCompany" and a['name'] == "MarbleRail")
+def wzr(n: Network, data: GatelogueDataNS):
+    company = next(a for a in data if isinstance(a, RailCompanyNS) and a.name == "West Zeta Rail")
 
-    for line_i in company["lines"]:
-        line = data[str(line_i)]
-        n.add_line(Line(id=line_i, name="MTC " + line["code"], colour=Colour.solid(line["colour"] or "#888")))
-
-    stations = _station(n, company, data)
-    _connect(n, company, data)
-    return stations
-
-
-def nsc(n: Network, data: dict[str, dict]):
-    company = next(a for a in data.values() if a['type'] == "RailCompany" and a['name'] == "Network South Central")
-
-    for line_i in company["lines"]:
-        line = data[str(line_i)]
-        n.add_line(Line(id=line_i, name="NSC " + line["code"], colour=Colour.solid(line["colour"] or "#888")))
+    for line_i in company.lines:
+        line: RailLineNS = data[line_i]
+        n.add_line(Line(id=line_i, name="WZR " + line.code, colour=Colour.solid(line.colour or "#888")))
 
     stations = _station(n, company, data)
     _connect(n, company, data)
     return stations
 
 
-def redtrain(n: Network, data: dict[str, dict]):
-    company = next(a for a in data.values() if a['type'] == "RailCompany" and a['name'] == "RedTrain")
+def mtc(n: Network, data: GatelogueDataNS):
+    company = next(a for a in data if isinstance(a, RailCompanyNS) and a.name == "MarbleRail")
 
-    for line_i in company["lines"]:
-        line = data[str(line_i)]
+    for line_i in company.lines:
+        line: RailLineNS = data[line_i]
+        n.add_line(Line(id=line_i, name="MTC " + line.code, colour=Colour.solid(line.colour or "#888")))
+
+    stations = _station(n, company, data)
+    _connect(n, company, data)
+    return stations
+
+
+def nsc(n: Network, data: GatelogueDataNS):
+    company = next(a for a in data if isinstance(a, RailCompanyNS) and a.name == "Network South Central")
+
+    for line_i in company.lines:
+        line: RailLineNS = data[line_i]
+        n.add_line(Line(id=line_i, name="NSC " + line.code, colour=Colour.solid(line.colour or "#888")))
+
+    stations = _station(n, company, data)
+    _connect(n, company, data)
+    return stations
+
+
+def redtrain(n: Network, data: GatelogueDataNS):
+    company = next(a for a in data if isinstance(a, RailCompanyNS) and a.name == "RedTrain")
+
+    for line_i in company.lines:
+        line: RailLineNS = data[line_i]
         n.add_line(
-            Line(id=line_i, name="RedTrain " + line["code"], colour=Colour.solid(line["colour"] or "#888"))
+            Line(id=line_i, name="RedTrain " + line.code, colour=Colour.solid(line.colour or "#888"))
         )
 
     stations = _station(n, company, data)
@@ -168,37 +170,38 @@ def redtrain(n: Network, data: dict[str, dict]):
     return stations
 
 
-def rn(n: Network, data: dict[str, dict]):
-    company = next(a for a in data.values() if a['type'] == "RailCompany" and a['name'] == "RailNorth")
+def rn(n: Network, data: GatelogueDataNS):
+    company = next(a for a in data if isinstance(a, RailCompanyNS) and a.name == "RailNorth")
 
-    for line_i in company["lines"]:
-        line = data[str(line_i)]
-        n.add_line(Line(id=line_i, name=line["code"], colour=Colour.solid(line["colour"] or "#888")))
-
-    stations = _station(n, company, data)
-    _connect(n, company, data)
-    return stations
-
-def sb(n: Network, data: dict[str, dict]):
-    company = next(a for a in data.values() if a['type'] == "RailCompany" and a['name'] == "Seabeast Rail")
-
-    for line_i in company["lines"]:
-        line = data[str(line_i)]
-        n.add_line(Line(id=line_i, name="Seabeast" + line["code"], colour=Colour.solid(line["colour"] or "#333")))
+    for line_i in company.lines:
+        line: RailLineNS = data[line_i]
+        n.add_line(Line(id=line_i, name=line.code, colour=Colour.solid(line.colour or "#888")))
 
     stations = _station(n, company, data)
     _connect(n, company, data)
     return stations
 
 
-def fr(n: Network, data: dict[str, dict]):
-    company = next(a for a in data.values() if a['type'] == "RailCompany" and a['name'] == "Fred Rail")
+def sb(n: Network, data: GatelogueDataNS):
+    company = next(a for a in data if isinstance(a, RailCompanyNS) and a.name == "Seabeast Rail")
+
+    for line_i in company.lines:
+        line: RailLineNS = data[line_i]
+        n.add_line(Line(id=line_i, name="Seabeast" + line.code, colour=Colour.solid(line.colour or "#333")))
+
+    stations = _station(n, company, data)
+    _connect(n, company, data)
+    return stations
+
+
+def fr(n: Network, data: GatelogueDataNS):
+    company = next(a for a in data if isinstance(a, RailCompanyNS) and a.name == "Fred Rail")
 
     lines = {}
-    for line_i in company["lines"]:
-        line = data[str(line_i)]
+    for line_i in company.lines:
+        line: RailLineNS = data[line_i]
         line = n.add_line(
-            Line(id=line_i, name="FR " + line["code"], colour=Colour.solid(line["colour"] or "#888"))
+            Line(id=line_i, name="FR " + line.code, colour=Colour.solid(line.colour or "#888"))
         )
         lines[line.name] = line
 
@@ -206,14 +209,15 @@ def fr(n: Network, data: dict[str, dict]):
     _connect(n, company, data)
     return stations, lines
 
-def seat(n: Network, data: dict[str, dict]):
-    company = next(a for a in data.values() if a['type'] == "RailCompany" and a['name'] == "SEAT")
+
+def seat(n: Network, data: GatelogueDataNS):
+    company = next(a for a in data if isinstance(a, RailCompanyNS) and a.name == "SEAT")
 
     lines = {}
-    for line_i in company["lines"]:
-        line = data[str(line_i)]
+    for line_i in company.lines:
+        line: RailLineNS = data[line_i]
         line = n.add_line(
-            Line(id=line_i, name="SEAT " + line["code"], colour=Colour.solid(line["colour"] or "#888"))
+            Line(id=line_i, name="SEAT " + line.code, colour=Colour.solid(line.colour or "#888"))
         )
         lines[line.name] = line
 
@@ -221,29 +225,15 @@ def seat(n: Network, data: dict[str, dict]):
     _connect(n, company, data)
     return stations, lines
 
-def pac(n: Network, data: dict[str, dict]):
-    company = next(a for a in data.values() if a['type'] == "RailCompany" and a['name'] == "Pacifica")
+
+def pac(n: Network, data: GatelogueDataNS):
+    company = next(a for a in data if isinstance(a, RailCompanyNS) and a.name == "Pacifica")
 
     lines = {}
-    for line_i in company["lines"]:
-        line = data[str(line_i)]
+    for line_i in company.lines:
+        line: RailLineNS = data[line_i]
         line = n.add_line(
-            Line(id=line_i, name="Pac " + line["code"], colour=Colour.solid(line["colour"] or "#888"))
-        )
-        lines[line.name] = line
-
-    stations = _station(n, company, data)
-    _connect(n, company, data)
-    return stations, lines
-    
-def nrn(n: Network, data: dict[str, dict]):
-    company = next(a for a in data.values() if a['type'] == "RailCompany" and a['name'] == "Nobody's Rail Network")
-
-    lines = {}
-    for line_i in company["lines"]:
-        line = data[str(line_i)]
-        line = n.add_line(
-            Line(id=line_i, name="NRN " + line["code"], colour=Colour.solid(line["colour"] or "#888"))
+            Line(id=line_i, name="Pac " + line.code, colour=Colour.solid(line.colour or "#888"))
         )
         lines[line.name] = line
 
@@ -251,24 +241,41 @@ def nrn(n: Network, data: dict[str, dict]):
     _connect(n, company, data)
     return stations, lines
 
-def metros(n: Network, data: dict[str, dict]):
-    companies = (a for a in data.values() if a['type'] == "RailCompany" and a['local'])
+
+def nrn(n: Network, data: GatelogueDataNS):
+    company = next(a for a in data if isinstance(a, RailCompanyNS) and a.name == "Nobody's Rail Network")
+
+    lines = {}
+    for line_i in company.lines:
+        line: RailLineNS = data[line_i]
+        line = n.add_line(
+            Line(id=line_i, name="NRN " + line.code, colour=Colour.solid(line.colour or "#888"))
+        )
+        lines[line.name] = line
+
+    stations = _station(n, company, data)
+    _connect(n, company, data)
+    return stations, lines
+
+
+def metros(n: Network, data: GatelogueDataNS):
+    companies = (a for a in data if isinstance(a, RailCompanyNS) and a.local)
 
     lines_all = {}
     stations_all = {}
     for company in companies:
         lines = {}
-        for line_i in company["lines"]:
-            line = data[str(line_i)]
+        for line_i in company.lines:
+            line: RailLineNS = data[line_i]
             line = n.add_line(
-                Line(id=line_i, name=line["code"], colour=Colour.solid(line["colour"] or "#888", 0.5))
+                Line(id=line_i, name=line.code, colour=Colour.solid(line.colour or "#888", 0.5))
             )
             lines[line.name] = line
 
         stations = _station(n, company, data)
         _connect(n, company, data)
-        lines_all[company['name']] = lines
-        stations_all[company['name']] = stations
+        lines_all[company.name] = lines
+        stations_all[company.name] = stations
     return stations_all, lines_all
 
 

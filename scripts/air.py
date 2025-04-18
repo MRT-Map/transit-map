@@ -5,44 +5,46 @@ from autocarter.colour import Colour
 from autocarter.drawer import Drawer
 from autocarter.network import Line, Network, Station
 from autocarter.style import Style
+from gatelogue_types import GatelogueDataNS, AirAirportNS, AirAirlineNS, AirFlightNS
+
 from utils import handle_proximity, handle_shared_stations
 
 
-def air(data):
+def air(data: GatelogueDataNS):
     n = Network()
 
-    for airport in (a for a in data.values() if a["type"] == "AirAirport"):
-        if airport["coordinates"] is None:
+    for airport in (a for a in data if isinstance(a, AirAirportNS)):
+        if airport.coordinates is None:
             continue
-        if airport['world'] == "Old":
-            x, y = airport['coordinates']
-            airport['coordinates'] = [x+30000-3200, y-30000-3200-1000]
+        if airport.world == "Old":
+            x, y = airport.coordinates
+            airport.coordinates = (x+30000-3200, y-30000-3200-1000)
 
         n.add_station(
             Station(
-                id=airport["i"],
-                name=airport["code"] + " " + airport["name"],
+                id=airport.i,
+                name=airport.code + " " + airport.name,
                 coordinates=vector.obj(
-                    x=airport["coordinates"][0], y=airport["coordinates"][1]
+                    x=airport.coordinates[0], y=airport.coordinates[1]
                 ),
             )
         )
 
-    for company in (a for a in data.values() if a["type"] == "AirAirline"):
-        for flight_id in company["flights"]:
-            flight = data[str(flight_id)]
+    for company in (a for a in data if isinstance(a, AirAirlineNS)):
+        for flight_id in company.flights:
+            flight: AirFlightNS = data[flight_id]
 
             line = n.add_line(
                 Line(
                     id=flight_id,
-                    name=company["name"] + " " + "/".join(flight["codes"]),
+                    name=company.name + " " + "/".join(flight.codes),
                     colour=Colour.solid("#888"),
                 )
             )
 
             prev_airport_id = None
-            for gate_id in flight["gates"]:
-                airport_id = data[str(gate_id)]["airport"]
+            for gate_id in flight.gates:
+                airport_id = data[gate_id].airport
                 if (
                     prev_airport_id is not None
                     and prev_airport_id not in n.stations
