@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-import vector
 from autocarter.network import Connection, Network, Station
+from autocarter.vector import Vector
 
 if TYPE_CHECKING:
     from gatelogue_types import (
@@ -77,7 +77,7 @@ def _station(n: Network, company: RailCompanyNS | BusCompanyNS | SeaCompanyNS, d
             Station(
                 id=station_i,
                 name=station.name.replace("&", "&amp;"),
-                coordinates=vector.obj(x=coordinates[0], y=coordinates[1]),
+                coordinates=Vector(*coordinates),
             )
         )
         stations[station2.name] = station2

@@ -1,10 +1,10 @@
 from __future__ import annotations
 
-import vector
 from autocarter.colour import Colour
 from autocarter.drawer import Drawer
 from autocarter.network import Line, Network, Station
 from autocarter.style import Style
+from autocarter.vector import Vector
 from gatelogue_types import AirAirlineNS, AirAirportNS, AirFlightNS, GatelogueDataNS
 from utils import handle_proximity, handle_shared_stations
 
@@ -17,15 +17,13 @@ def air(data: GatelogueDataNS):
             continue
         if airport.world == "Old":
             x, y = airport.coordinates
-            airport.coordinates = (x+30000-3200, y-30000-3200-1000)
+            airport.coordinates = (x + 30000 - 3200, y - 30000 - 3200 - 1000)
 
         n.add_station(
             Station(
                 id=airport.i,
                 name=airport.code + " " + airport.name,
-                coordinates=vector.obj(
-                    x=airport.coordinates[0], y=airport.coordinates[1]
-                ),
+                coordinates=Vector(*airport.coordinates),
             )
         )
 
@@ -44,11 +42,7 @@ def air(data: GatelogueDataNS):
             prev_airport_id = None
             for gate_id in flight.gates:
                 airport_id = data[gate_id].airport
-                if (
-                    prev_airport_id is not None
-                    and prev_airport_id not in n.stations
-                    or airport_id not in n.stations
-                ):
+                if prev_airport_id is not None and prev_airport_id not in n.stations or airport_id not in n.stations:
                     continue
                 if prev_airport_id is not None:
                     n.connect(n.stations[prev_airport_id], n.stations[airport_id], line)

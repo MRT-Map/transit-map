@@ -12,7 +12,7 @@ def intra(n: Network, data: GatelogueDataNS):
     company = next(a for a in data if isinstance(a, BusCompanyNS) and a.name == "IntraBus")
 
     for line_i in company.lines:
-        line: BusLineNS =data[line_i]
+        line: BusLineNS = data[line_i]
         n.add_line(Line(id=line_i, name="IB " + line.code, colour=Colour.solid(line.colour or "#888")))
 
     stations = _station(n, company, data)
@@ -24,7 +24,7 @@ def ccc(n: Network, data: GatelogueDataNS):
     company = next(a for a in data if isinstance(a, BusCompanyNS) and a.name == "Caravacan Caravan Company")
 
     for line_i in company.lines:
-        line: BusLineNS =data[line_i]
+        line: BusLineNS = data[line_i]
         n.add_line(Line(id=line_i, name="CCC " + line.code, colour=Colour.solid(line.colour or "#800")))
 
     stations = _station(n, company, data)
@@ -36,7 +36,7 @@ def sb(n: Network, data: GatelogueDataNS):
     company = next(a for a in data if isinstance(a, BusCompanyNS) and a.name == "Seabeast Buses")
 
     for line_i in company.lines:
-        line: BusLineNS =data[line_i]
+        line: BusLineNS = data[line_i]
         n.add_line(Line(id=line_i, name="SeaBeast " + line.code, colour=Colour.solid(line.colour or "#333")))
 
     stations = _station(n, company, data)

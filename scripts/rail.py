@@ -1,10 +1,10 @@
 from __future__ import annotations
 
-import vector
 from autocarter.colour import Colour, Stroke
 from autocarter.drawer import Drawer
 from autocarter.network import Line, Network, Station
 from autocarter.style import Style
+from autocarter.vector import Vector
 from gatelogue_types import GatelogueDataNS, RailCompanyNS, RailLineNS
 from utils import _connect, _station, handle_proximity, handle_shared_stations
 
@@ -31,12 +31,8 @@ def mrt(n: Network, data: GatelogueDataNS):
         station = n.add_station(
             Station(
                 id=station_i,
-                name=(
-                        " ".join(sorted(station.codes))
-                        + " "
-                        + (station.name or "")
-                ).strip(),
-                coordinates=vector.obj(x=coordinates[0], y=coordinates[1]),
+                name=(" ".join(sorted(station.codes)) + " " + (station.name or "")).strip(),
+                coordinates=Vector(*coordinates),
             )
         )
         stations[station.name] = station
@@ -62,9 +58,7 @@ def nflr(n: Network, data: GatelogueDataNS):
             )
         else:
             colour = Colour.solid(line.colour or "#888")
-        line2 = n.add_line(
-            Line(id=line_i, name="nFLR " + line.code, colour=colour)
-        )
+        line2 = n.add_line(Line(id=line_i, name="nFLR " + line.code, colour=colour))
         lines[line2.name] = line2
 
     stations = _station(n, company, data)
@@ -81,8 +75,7 @@ def intra(n: Network, data: GatelogueDataNS):
         line2 = n.add_line(
             Line(
                 id=line_i,
-                name="IR "
-                     + line.code.replace("<", "&lt;").replace(">", "&gt;"),
+                name="IR " + line.code.replace("<", "&lt;").replace(">", "&gt;"),
                 colour=Colour.solid(line.colour or "#888"),
             )
         )
@@ -98,9 +91,7 @@ def blu(n: Network, data: GatelogueDataNS):
 
     for line_i in company.lines:
         line: RailLineNS = data[line_i]
-        n.add_line(Line(id=line_i, name="Blu " + line.code, colour=Colour.solid(
-            line.colour or "#888"
-        )))
+        n.add_line(Line(id=line_i, name="Blu " + line.code, colour=Colour.solid(line.colour or "#888")))
 
     stations = _station(n, company, data)
     _connect(n, company, data)
@@ -160,9 +151,7 @@ def redtrain(n: Network, data: GatelogueDataNS):
 
     for line_i in company.lines:
         line: RailLineNS = data[line_i]
-        n.add_line(
-            Line(id=line_i, name="RedTrain " + line.code, colour=Colour.solid(line.colour or "#888"))
-        )
+        n.add_line(Line(id=line_i, name="RedTrain " + line.code, colour=Colour.solid(line.colour or "#888")))
 
     stations = _station(n, company, data)
     _connect(n, company, data)
@@ -199,9 +188,7 @@ def fr(n: Network, data: GatelogueDataNS):
     lines = {}
     for line_i in company.lines:
         line: RailLineNS = data[line_i]
-        line2 = n.add_line(
-            Line(id=line_i, name="FR " + line.code, colour=Colour.solid(line.colour or "#888"))
-        )
+        line2 = n.add_line(Line(id=line_i, name="FR " + line.code, colour=Colour.solid(line.colour or "#888")))
         lines[line2.name] = line2
 
     stations = _station(n, company, data)
@@ -215,9 +202,7 @@ def seat(n: Network, data: GatelogueDataNS):
     lines = {}
     for line_i in company.lines:
         line: RailLineNS = data[line_i]
-        line2 = n.add_line(
-            Line(id=line_i, name="SEAT " + line.code, colour=Colour.solid(line.colour or "#888"))
-        )
+        line2 = n.add_line(Line(id=line_i, name="SEAT " + line.code, colour=Colour.solid(line.colour or "#888")))
         lines[line2.name] = line2
 
     stations = _station(n, company, data)
@@ -231,9 +216,7 @@ def pac(n: Network, data: GatelogueDataNS):
     lines = {}
     for line_i in company.lines:
         line: RailLineNS = data[line_i]
-        line2 = n.add_line(
-            Line(id=line_i, name="Pac " + line.code, colour=Colour.solid(line.colour or "#888"))
-        )
+        line2 = n.add_line(Line(id=line_i, name="Pac " + line.code, colour=Colour.solid(line.colour or "#888")))
         lines[line2.name] = line2
 
     stations = _station(n, company, data)
@@ -247,9 +230,7 @@ def nrn(n: Network, data: GatelogueDataNS):
     lines = {}
     for line_i in company.lines:
         line: RailLineNS = data[line_i]
-        line2 = n.add_line(
-            Line(id=line_i, name="NRN " + line.code, colour=Colour.solid(line.colour or "#888"))
-        )
+        line2 = n.add_line(Line(id=line_i, name="NRN " + line.code, colour=Colour.solid(line.colour or "#888")))
         lines[line2.name] = line2
 
     stations = _station(n, company, data)
@@ -266,9 +247,7 @@ def metros(n: Network, data: GatelogueDataNS):
         lines = {}
         for line_i in company.lines:
             line: RailLineNS = data[line_i]
-            line2 = n.add_line(
-                Line(id=line_i, name=line.code, colour=Colour.solid(line.colour or "#888", 0.5))
-            )
+            line2 = n.add_line(Line(id=line_i, name=line.code, colour=Colour.solid(line.colour or "#888", 0.5)))
             lines[line2.name] = line2
 
         stations = _station(n, company, data)
@@ -342,17 +321,17 @@ def rail(data):
         [s_intra["Woodsbane"].id, s_intra["Siletz Salvador Station"].id],
     ]
     s_intra["Siletz Salvador Station"].adjacent_stations[l_intra["IR 2X"].id] = [
-        [s_intra["Woodsbane"].id, s_intra["Achowalogen Takachsin-Covina International Airport"].id], []
+        [s_intra["Woodsbane"].id, s_intra["Achowalogen Takachsin-Covina International Airport"].id],
+        [],
     ]
     s_flrk = sm["FLR Kazeshima/Shui Chau"]
     l_flrk = lm["FLR Kazeshima/Shui Chau"]
-    s_flrk["Ho Kok"].adjacent_stations[l_flrk["C1"].id] = [
-        [s_flrk["Ho Kok West"].id, s_flrk["Sha Tsui"].id], []
-    ]
+    s_flrk["Ho Kok"].adjacent_stations[l_flrk["C1"].id] = [[s_flrk["Ho Kok West"].id, s_flrk["Sha Tsui"].id], []]
     s_nps = sm["New Prubourne Subway"]
     l_nps = lm["New Prubourne Subway"]
     s_nps["Evergreen Parkway"].adjacent_stations[l_nps["B"].id] = [
-        [s_nps["Wuster Drive"].id, s_nps["Penn Island-Zoo"]], []
+        [s_nps["Wuster Drive"].id, s_nps["Penn Island-Zoo"]],
+        [],
     ]
 
     handle_shared_stations(data, n)
