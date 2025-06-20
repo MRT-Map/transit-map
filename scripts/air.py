@@ -22,7 +22,7 @@ def air(data: GatelogueDataNS):
         n.add_station(
             Station(
                 id=airport.i,
-                name=airport.code + " " + airport.name,
+                name=airport.code + " " + '/'.join(airport.names),
                 coordinates=Vector(*airport.coordinates),
             )
         )
