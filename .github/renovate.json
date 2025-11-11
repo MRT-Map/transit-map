@@ -5,8 +5,8 @@
   ],
   "packageRules": [
     {
-      "matchPackageNames": ["gatelogue-types"],
-      "extends": [":pinOnlyDevDependencies"]
+      "matchPackageNames": ["!gatelogue-types"],
+      "extends": [":pinAllExceptPeerDependencies"]
     }
   ]
 }
