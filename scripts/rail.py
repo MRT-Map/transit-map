@@ -358,14 +358,27 @@ def rail(data):
         [s_intra["Woodsbane"].id, s_intra["Achowalogen Takachsin-Covina International Airport"].id],
         [],
     ]
+
     s_flrk = sm["FLR Kazeshima/Shui Chau"]
     l_flrk = lm["FLR Kazeshima/Shui Chau"]
     s_flrk["Ho Kok"].adjacent_stations[l_flrk["C1"].id] = [[s_flrk["Ho Kok West"].id, s_flrk["Sha Tsui"].id], []]
+
     s_nps = sm["New Prubourne Subway"]
     l_nps = lm["New Prubourne Subway"]
     s_nps["Evergreen Parkway"].adjacent_stations[l_nps["B"].id] = [
-        [s_nps["Wuster Drive"].id, s_nps["Penn Island-Zoo"]],
+        [s_nps["Wuster Drive"].id, s_nps["Penn Island-Zoo"].id],
         [],
+    ]
+
+    s_erzt = sm["ErzLink Trams"]
+    l_erzt = lm["ErzLink Trams"]
+    s_erzt["Atrium North"].adjacent_stations[l_erzt["3"].id] = [
+        [s_erzt["Atrium West"].id, s_erzt["Atrium East"].id],
+        [s_erzt["Almono"].id],
+    ]
+    s_erzt["Atrium South"].adjacent_stations[l_erzt["3"].id] = [
+        [s_erzt["Atrium West"].id, s_erzt["Atrium East"].id],
+        [s_erzt["Spire of New Domain"].id],
     ]
 
     handle_shared_stations(data, n)
