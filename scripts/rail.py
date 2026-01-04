@@ -254,6 +254,22 @@ def breeze(n: Network, data: GatelogueDataNS):
     return stations, lines
 
 
+def erzi(n: Network, data: GatelogueDataNS):
+    company = next(a for a in data if isinstance(a, RailCompanyNS) and a.name == "ErzLink Intercity")
+
+    lines = {}
+    for line_i in company.lines:
+        line: RailLineNS = data[line_i]
+        line2 = n.add_line(
+            Line(id=line_i, name="ErzLink " + line.code, colour=Colour.solid(line.colour or "#00c3ff"))
+        )
+        lines[line2.name] = line2
+
+    stations = _station(n, company, data)
+    _connect(n, company, data)
+    return stations, lines
+
+
 def metros(n: Network, data: GatelogueDataNS):
     companies = (a for a in data if isinstance(a, RailCompanyNS) and a.local)
 
@@ -291,6 +307,7 @@ def rail(data):
     pac(n, data)
     nrn(n, data)
     breeze(n, data)
+    erzi(n, data)
     sm, lm = metros(n, data)
 
     s_nflr["Deadbush Karaj Expo"].adjacent_stations[l_nflr["nFLR R5A"].id] = [
