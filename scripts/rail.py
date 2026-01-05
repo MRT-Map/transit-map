@@ -398,6 +398,17 @@ def rail(data):
         [s_erzt["Spire of New Domain"].id],
     ]
 
+    s_ref = sm["Refuge Streetcar"]
+    l_ref = lm["Refuge Streetcar"]
+    s_ref["West Train Station"].adjacent_stations[l_ref["North/South Loop"].id] = [
+        [s_ref["Cranberry Green"].id, s_ref["Downtown North"].id],
+        [s_ref["Hilltop"].id],
+    ]
+    s_ref["South Hill"].adjacent_stations[l_ref["North/South Loop"].id] = [
+        [s_ref["Refuge Airfield North"].id, s_ref["University South"].id],
+        [s_ref["Hilltop"].id],
+    ]
+
     handle_shared_stations(data, n)
     handle_proximity(data, n)
     n.finalise()
