@@ -31,7 +31,9 @@ def mrt(n: Network, data: GatelogueDataNS):
         station = n.add_station(
             Station(
                 id=station_i,
-                name=(" ".join(sorted(station.codes)) + " " + (station.name or "")).strip(),
+                name=(
+                    " ".join(sorted(station.codes)) + " " + (station.name or "")
+                ).strip(),
                 coordinates=Vector(*coordinates),
             )
         )
@@ -42,260 +44,55 @@ def mrt(n: Network, data: GatelogueDataNS):
     return stations
 
 
-def nflr(n: Network, data: GatelogueDataNS):
-    company = next(a for a in data if isinstance(a, RailCompanyNS) and a.name == "nFLR")
-
-    lines = {}
-    for line_i in company.lines:
-        line: RailLineNS = data[line_i]
-        name = line.name
-        if name.startswith("W") or name.endswith("Rapid"):
-            colour = Colour(
-                (
-                    Stroke(dashes=line.colour, thickness_multiplier=1.0),
-                    Stroke(dashes="#fff", thickness_multiplier=0.5),
-                )
-            )
-        else:
-            colour = Colour.solid(line.colour or "#888")
-        line2 = n.add_line(Line(id=line_i, name="nFLR " + line.code, colour=colour))
-        lines[line2.name] = line2
-
-    stations = _station(n, company, data)
-    _connect(n, company, data)
-    return stations, lines
-
-
-def intra(n: Network, data: GatelogueDataNS):
-    company = next(a for a in data if isinstance(a, RailCompanyNS) and a.name == "IntraRail")
-
-    lines = {}
-    for line_i in company.lines:
-        line: RailLineNS = data[line_i]
-        line2 = n.add_line(
-            Line(
-                id=line_i,
-                name="IR " + line.code.replace("<", "&lt;").replace(">", "&gt;"),
-                colour=Colour.solid(line.colour or "#888"),
-            )
-        )
-        lines[line2.name] = line2
-
-    stations = _station(n, company, data)
-    _connect(n, company, data)
-    return stations, lines
-
-
-def blu(n: Network, data: GatelogueDataNS):
-    company = next(a for a in data if isinstance(a, RailCompanyNS) and a.name == "BluRail")
-
-    for line_i in company.lines:
-        line: RailLineNS = data[line_i]
-        n.add_line(Line(id=line_i, name="Blu " + line.code, colour=Colour.solid(line.colour or "#888")))
-
-    stations = _station(n, company, data)
-    _connect(n, company, data)
-    return stations
-
-
-def rlq(n: Network, data: GatelogueDataNS):
-    company = next(a for a in data if isinstance(a, RailCompanyNS) and a.name == "RaiLinQ")
-
-    for line_i in company.lines:
-        line: RailLineNS = data[line_i]
-        n.add_line(Line(id=line_i, name="RLQ " + line.code, colour=Colour.solid(line.colour or "#888")))
-
-    stations = _station(n, company, data)
-    _connect(n, company, data)
-    return stations
-
-
-def wzr(n: Network, data: GatelogueDataNS):
-    company = next(a for a in data if isinstance(a, RailCompanyNS) and a.name == "West Zeta Rail")
-
-    for line_i in company.lines:
-        line: RailLineNS = data[line_i]
-        n.add_line(Line(id=line_i, name="WZR " + line.code, colour=Colour.solid(line.colour or "#888")))
-
-    stations = _station(n, company, data)
-    _connect(n, company, data)
-    return stations
-
-
-def mtc(n: Network, data: GatelogueDataNS):
-    company = next(a for a in data if isinstance(a, RailCompanyNS) and a.name == "MarbleRail")
-
-    for line_i in company.lines:
-        line: RailLineNS = data[line_i]
-        n.add_line(Line(id=line_i, name="MTC " + line.code, colour=Colour.solid(line.colour or "#888")))
-
-    stations = _station(n, company, data)
-    _connect(n, company, data)
-    return stations
-
-
-def nsc(n: Network, data: GatelogueDataNS):
-    company = next(a for a in data if isinstance(a, RailCompanyNS) and a.name == "Network South Central")
-
-    for line_i in company.lines:
-        line: RailLineNS = data[line_i]
-        n.add_line(Line(id=line_i, name="NSC " + line.code, colour=Colour.solid(line.colour or "#888")))
-
-    stations = _station(n, company, data)
-    _connect(n, company, data)
-    return stations
-
-
-def redtrain(n: Network, data: GatelogueDataNS):
-    company = next(a for a in data if isinstance(a, RailCompanyNS) and a.name == "RedTrain")
-
-    for line_i in company.lines:
-        line: RailLineNS = data[line_i]
-        n.add_line(Line(id=line_i, name="RedTrain " + line.code, colour=Colour.solid(line.colour or "#888")))
-
-    stations = _station(n, company, data)
-    _connect(n, company, data)
-    return stations
-
-
-def rn(n: Network, data: GatelogueDataNS):
-    company = next(a for a in data if isinstance(a, RailCompanyNS) and a.name == "RailNorth")
-
-    for line_i in company.lines:
-        line: RailLineNS = data[line_i]
-        n.add_line(Line(id=line_i, name=line.code, colour=Colour.solid(line.colour or "#888")))
-
-    stations = _station(n, company, data)
-    _connect(n, company, data)
-    return stations
-
-
-def sb(n: Network, data: GatelogueDataNS):
-    company = next(a for a in data if isinstance(a, RailCompanyNS) and a.name == "Seabeast Rail")
-
-    for line_i in company.lines:
-        line: RailLineNS = data[line_i]
-        n.add_line(Line(id=line_i, name="Seabeast" + line.code, colour=Colour.solid(line.colour or "#333")))
-
-    stations = _station(n, company, data)
-    _connect(n, company, data)
-    return stations
-
-
-def fr(n: Network, data: GatelogueDataNS):
-    company = next(a for a in data if isinstance(a, RailCompanyNS) and a.name == "Fred Rail")
-
-    lines = {}
-    for line_i in company.lines:
-        line: RailLineNS = data[line_i]
-        line2 = n.add_line(Line(id=line_i, name="FR " + line.code, colour=Colour.solid(line.colour or "#888")))
-        lines[line2.name] = line2
-
-    stations = _station(n, company, data)
-    _connect(n, company, data)
-    return stations, lines
-
-
-def seat(n: Network, data: GatelogueDataNS):
-    company = next(a for a in data if isinstance(a, RailCompanyNS) and a.name == "SEAT")
-
-    lines = {}
-    for line_i in company.lines:
-        line: RailLineNS = data[line_i]
-        line2 = n.add_line(Line(id=line_i, name="SEAT " + line.code, colour=Colour.solid(line.colour or "#888")))
-        lines[line2.name] = line2
-
-    stations = _station(n, company, data)
-    _connect(n, company, data)
-    return stations, lines
-
-
-def pac(n: Network, data: GatelogueDataNS):
-    company = next(a for a in data if isinstance(a, RailCompanyNS) and a.name == "Pacifica")
-
-    lines = {}
-    for line_i in company.lines:
-        line: RailLineNS = data[line_i]
-        line2 = n.add_line(Line(id=line_i, name="Pac " + line.code, colour=Colour.solid(line.colour or "#888")))
-        lines[line2.name] = line2
-
-    stations = _station(n, company, data)
-    _connect(n, company, data)
-    return stations, lines
-
-
-def nrn(n: Network, data: GatelogueDataNS):
-    company = next(a for a in data if isinstance(a, RailCompanyNS) and a.name == "Nobody's Rail Network")
-
-    lines = {}
-    for line_i in company.lines:
-        line: RailLineNS = data[line_i]
-        line2 = n.add_line(Line(id=line_i, name="NRN " + line.code, colour=Colour.solid(line.colour or "#888")))
-        lines[line2.name] = line2
-
-    stations = _station(n, company, data)
-    _connect(n, company, data)
-    return stations, lines
-
-
-def breeze(n: Network, data: GatelogueDataNS):
-    company = next(a for a in data if isinstance(a, RailCompanyNS) and a.name == "BreezeRail")
-
-    lines = {}
-    for line_i in company.lines:
-        line: RailLineNS = data[line_i]
-        line2 = n.add_line(
-            Line(id=line_i, name="BreezeRail " + line.code, colour=Colour.solid(line.colour or "#00c3ff"))
-        )
-        lines[line2.name] = line2
-
-    stations = _station(n, company, data)
-    _connect(n, company, data)
-    return stations, lines
-
-
-def erzi(n: Network, data: GatelogueDataNS):
-    company = next(a for a in data if isinstance(a, RailCompanyNS) and a.name == "ErzLink Intercity")
-
-    lines = {}
-    for line_i in company.lines:
-        line: RailLineNS = data[line_i]
-        line2 = n.add_line(
-            Line(id=line_i, name="ErzLink " + line.code, colour=Colour.solid(line.colour or "#00c3ff"))
-        )
-        lines[line2.name] = line2
-
-    stations = _station(n, company, data)
-    _connect(n, company, data)
-    return stations, lines
-
-
-def lava(n: Network, data: GatelogueDataNS):
-    company = next(a for a in data if isinstance(a, RailCompanyNS) and a.name == "Lava Rail")
-
-    lines = {}
-    for line_i in company.lines:
-        line: RailLineNS = data[line_i]
-        line2 = n.add_line(
-            Line(id=line_i, name="Lava " + line.code, colour=Colour.solid(line.colour or "#00c3ff"))
-        )
-        lines[line2.name] = line2
-
-    stations = _station(n, company, data)
-    _connect(n, company, data)
-    return stations, lines
-
-
-def metros(n: Network, data: GatelogueDataNS):
-    companies = (a for a in data if isinstance(a, RailCompanyNS) and a.local)
+def the_rest(n: Network, data: GatelogueDataNS):
+    companies = sorted((a for a in data if isinstance(a, RailCompanyNS) and a.name != "MRT"), key=lambda a: a.name)
 
     lines_all = {}
     stations_all = {}
     for company in companies:
+        prefix = {
+            "BluRail": "Blu",
+            "IntraRail": "IR",
+            "RaiLinQ": "RLQ",
+            "West Zeta Rail": "WZR",
+            "MarbleRail": "MTC",
+            "Network South Central": "NSC",
+            "RailNorth": "",
+            "Seabeast Rail": "Seabeast",
+            "Fred Rail": "FR",
+            "Pacifica": "Pac",
+            "Nobody's Rail Network": "NRN",
+            "ErzLink Intercity": "Erz",
+            "Lava Rail": "Lava",
+            "CVCExpress": "CVC",
+        }.get(company.name, company.name) or ""
         lines = {}
         for line_i in company.lines:
             line: RailLineNS = data[line_i]
-            line2 = n.add_line(Line(id=line_i, name=line.code, colour=Colour.solid(line.colour or "#888", 0.5)))
+
+            name = (
+                (line.code if company.local else prefix + " " + line.code)
+                .strip()
+                .replace("<", "&lt;")
+                .replace(">", "&gt;")
+            )
+            thickness = 0.5 if company.local else 1.0
+            colour = (
+                Colour(
+                    (
+                        Stroke(dashes=line.colour or "#888", thickness_multiplier=thickness),
+                        Stroke(dashes="#fff", thickness_multiplier=thickness / 2),
+                    )
+                )
+                if (
+                    company.name == "nFLR"
+                    and (line.code.startswith("W") or line.code.endswith("Rapid"))
+                ) or (company.name == "ErzLink Trams" and line.code.startswith("X"))
+                or (company.name == "ErzLink Metro" and line.code.endswith("Express"))
+                else Colour.solid(line.colour or "#888", thickness)
+            )
+
+            line2 = n.add_line(Line(id=line_i, name=name, colour=colour))
             lines[line2.name] = line2
 
         stations = _station(n, company, data)
@@ -308,24 +105,12 @@ def metros(n: Network, data: GatelogueDataNS):
 def rail(data):
     n = Network()
     mrt(n, data)
-    s_nflr, l_nflr = nflr(n, data)
-    s_intra, l_intra = intra(n, data)
-    blu(n, data)
-    rlq(n, data)
-    wzr(n, data)
-    mtc(n, data)
-    nsc(n, data)
-    rn(n, data)
-    s_fr, l_fr = fr(n, data)
-    redtrain(n, data)
-    sb(n, data)
-    seat(n, data)
-    pac(n, data)
-    nrn(n, data)
-    breeze(n, data)
-    erzi(n, data)
-    lava(n, data)
-    sm, lm = metros(n, data)
+    s, l = the_rest(n, data)  # noqa: E741
+
+    s_nflr, l_nflr = s["nFLR"], l["nFLR"]
+    s_intra, l_intra = s["IntraRail"], l["IntraRail"]
+    s_fr, l_fr = s["Fred Rail"], l["Fred Rail"]
+    s_blu = s["BluRail"]
 
     s_nflr["Deadbush Karaj Expo"].adjacent_stations[l_nflr["nFLR R5A"].id] = [
         [s_nflr["Deadbush Works"].id],
@@ -343,52 +128,78 @@ def rail(data):
         [s_nflr["Light Society Villeside"].id],
         [s_nflr["Sansvikk Kamprad Airfield"].id, s_nflr["Glacierton"].id],
     ]
-    s_intra["Laclede Airport Plaza"].adjacent_stations[l_intra["IR 202"].id] = [
-        [s_intra["Laclede Central"].id],
-        [s_intra["Amestris Cummins Highway"].id, s_intra["Amestris Washington Street"].id],
-    ]
+
     s_fr["New Haven"].adjacent_stations[l_fr["FR New Jerseyan"].id] = [
-        [s_intra["Boston Clapham Junction"].id],
+        [s_fr["Boston Clapham Junction"].id],
         [s_fr["Tung Wan Transfer"].id, s_fr["Palo Alto"].id],
     ]
     s_fr["Palo Alto"].adjacent_stations[l_fr["FR New Jerseyan"].id] = [
         [s_fr["Concord"].id],
         [s_fr["Tung Wan Transfer"].id, s_fr["New Haven"].id],
     ]
+
+    s_intra["Laclede Airport Plaza"].adjacent_stations[l_intra["IR 202"].id] = [
+        [s_blu["Laclede Central"].id],
+        [
+            s_intra["Amestris Cummins Highway"].id,
+            s_intra["Amestris Washington Street"].id,
+        ],
+    ]
     s_intra["Formosa Northern"].adjacent_stations[l_intra["IR 2X"].id] = [
         [s_intra["Kenthurst Aerodrome"].id],
-        [s_intra["UCWT International Airport East"].id, s_intra["Danielston Paisley Place Transportation Center"].id],
+        [
+            s_intra["UCWT International Airport East"].id,
+            s_intra["Danielston Paisley Place Transportation Center"].id,
+        ],
     ]
-    s_intra["UCWT International Airport East"].adjacent_stations[l_intra["IR 2X"].id] = [
-        [s_intra["Formosa Northern"].id, s_intra["Danielston Paisley Place Transportation Center"].id],
-        [s_intra["Sealane Central"].id],
+    s_intra["UCWT International Airport East"].adjacent_stations[
+        l_intra["IR 2X"].id
+    ] = [
+        [
+            s_intra["Formosa Northern"].id,
+            s_intra["Danielston Paisley Place Transportation Center"].id,
+        ],
+        [s_blu["Sealane Central"].id],
     ]
-    s_intra["Central City Warp Rail Terminal"].adjacent_stations[l_intra["IR 2X"].id] = [
-        [s_intra["Central City Beltway Terminal North"].id],
-        [s_intra["Rochshire"].id, s_intra["Achowalogen Takachsin-Covina International Airport"].id],
+    s_intra["Central City Warp Rail Terminal"].adjacent_stations[
+        l_intra["IR 2X"].id
+    ] = [
+        [s_fr["Central City Beltway Terminal North"].id],
+        [
+            s_intra["Rochshire"].id,
+            s_intra["Achowalogen Takachsin-Covina International Airport"].id,
+        ],
     ]
-    s_intra["Achowalogen Takachsin-Covina International Airport"].adjacent_stations[l_intra["IR 2X"].id] = [
-        [s_intra["Central City Warp Rail Terminal"].id, s_intra["Rochshire"].id],
+    s_intra["Achowalogen Takachsin-Covina International Airport"].adjacent_stations[
+        l_intra["IR 2X"].id
+    ] = [
+        [s_blu["Central City Warp Rail Terminal"].id, s_intra["Sienos"].id],
         [s_intra["Woodsbane"].id, s_intra["Siletz Salvador Station"].id],
     ]
     s_intra["Siletz Salvador Station"].adjacent_stations[l_intra["IR 2X"].id] = [
-        [s_intra["Woodsbane"].id, s_intra["Achowalogen Takachsin-Covina International Airport"].id],
+        [
+            s_intra["Woodsbane"].id,
+            s_intra["Achowalogen Takachsin-Covina International Airport"].id,
+        ],
         [],
     ]
 
-    s_flrk = sm["FLR Kazeshima/Shui Chau"]
-    l_flrk = lm["FLR Kazeshima/Shui Chau"]
-    s_flrk["Ho Kok"].adjacent_stations[l_flrk["C1"].id] = [[s_flrk["Ho Kok West"].id, s_flrk["Sha Tsui"].id], []]
+    s_flrk = s["FLR Kazeshima/Shui Chau"]
+    l_flrk = l["FLR Kazeshima/Shui Chau"]
+    s_flrk["Ho Kok"].adjacent_stations[l_flrk["C1"].id] = [
+        [s_flrk["Ho Kok West"].id, s_flrk["Sha Tsui"].id],
+        [],
+    ]
 
-    s_nps = sm["New Prubourne Subway"]
-    l_nps = lm["New Prubourne Subway"]
+    s_nps = s["New Prubourne Subway"]
+    l_nps = l["New Prubourne Subway"]
     s_nps["Evergreen Parkway"].adjacent_stations[l_nps["B"].id] = [
         [s_nps["Wuster Drive"].id, s_nps["Penn Island-Zoo"].id],
         [],
     ]
 
-    s_erzt = sm["ErzLink Trams"]
-    l_erzt = lm["ErzLink Trams"]
+    s_erzt = s["ErzLink Trams"]
+    l_erzt = l["ErzLink Trams"]
     s_erzt["Atrium North"].adjacent_stations[l_erzt["3"].id] = [
         [s_erzt["Atrium West"].id, s_erzt["Atrium East"].id],
         [s_erzt["Almono"].id],
@@ -398,8 +209,8 @@ def rail(data):
         [s_erzt["Spire of New Domain"].id],
     ]
 
-    s_ref = sm["Refuge Streetcar"]
-    l_ref = lm["Refuge Streetcar"]
+    s_ref = s["Refuge Streetcar"]
+    l_ref = l["Refuge Streetcar"]
     s_ref["West Train Station"].adjacent_stations[l_ref["North/South Loop"].id] = [
         [s_ref["Cranberry Green"].id, s_ref["Downtown North"].id],
         [s_ref["Hilltop"].id],
