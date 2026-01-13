@@ -43,7 +43,6 @@ def alq(n: Network, data: GatelogueDataNS):
     _connect(n, company, data)
     return stations
 
-
 def cfc(n: Network, data: GatelogueDataNS):
     company = next(a for a in data if isinstance(a, SeaCompanyNS) and a.name == "Caravacan Floaty Company")
 
@@ -56,12 +55,36 @@ def cfc(n: Network, data: GatelogueDataNS):
     return stations
 
 
+def erz(n: Network, data: GatelogueDataNS):
+    company = next(a for a in data if isinstance(a, SeaCompanyNS) and a.name == "ErzLink Ferry")
+
+    for line_i in company.lines:
+        line: SeaLineNS = data[line_i]
+        n.add_line(Line(id=line_i, name=line.code, colour=Colour.solid(line.colour or "#0aa")))
+
+    stations = _station(n, company, data)
+    _connect(n, company, data)
+    return stations
+
+def windboat(n: Network, data: GatelogueDataNS):
+    company = next(a for a in data if isinstance(a, SeaCompanyNS) and a.name == "Windboat")
+
+    for line_i in company.lines:
+        line: SeaLineNS = data[line_i]
+        n.add_line(Line(id=line_i, name=line.code, colour=Colour.solid(line.colour or "#aaa")))
+
+    stations = _station(n, company, data)
+    _connect(n, company, data)
+    return stations
+
 def sea(data):
     n = Network()
     intra(n, data)
     wzf(n, data)
     alq(n, data)
     cfc(n, data)
+    erz(n, data)
+    windboat(n, data)
 
     handle_shared_stations(data, n)
     handle_proximity(data, n)
