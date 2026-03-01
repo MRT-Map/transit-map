@@ -4,56 +4,59 @@ from autocarter.colour import Colour
 from autocarter.drawer import Drawer
 from autocarter.network import Line, Network
 from autocarter.style import Style
-from gatelogue_types import BusCompanyNS, BusLineNS, GatelogueDataNS
+import gatelogue_types as gt
 from utils import _connect, _station, handle_proximity, handle_shared_stations
 
 
-def intra(n: Network, data: GatelogueDataNS):
-    company = next(a for a in data if isinstance(a, BusCompanyNS) and a.name == "IntraBus")
+def intra(n: Network, gd: gt.GD):
+    company = next(a for a in gd.nodes(gt.BusCompany) if a.name == "IntraBus")
 
-    for line_i in company.lines:
-        line: BusLineNS = data[line_i]
-        n.add_line(Line(id=line_i, name="IB " + line.code, colour=Colour.solid(line.colour or "#888")))
+    for line in company.lines:
+        n.add_line(Line(id=line.i, name="IB " + line.code, colour=Colour.solid(line.colour or "#888")))
 
-    stations = _station(n, company, data)
-    _connect(n, company, data)
+    stations = _station(n, company)
+    _connect(n, company)
     return stations
 
 
-def ccc(n: Network, data: GatelogueDataNS):
-    company = next(a for a in data if isinstance(a, BusCompanyNS) and a.name == "Caravacan Caravan Company")
+def ccc(n: Network, gd: gt.GD):
+    company = next(a for a in gd.nodes(gt.BusCompany) if a.name == "Caravacan Caravan Company")
 
-    for line_i in company.lines:
-        line: BusLineNS = data[line_i]
-        n.add_line(Line(id=line_i, name="CCC " + line.code, colour=Colour.solid(line.colour or "#800")))
+    for line in company.lines:
+        n.add_line(Line(id=line.i, name="CCC " + line.code, colour=Colour.solid(line.colour or "#800")))
 
-    stations = _station(n, company, data)
-    _connect(n, company, data)
+    stations = _station(n, company)
+    _connect(n, company)
     return stations
 
 
-def sb(n: Network, data: GatelogueDataNS):
-    company = next(a for a in data if isinstance(a, BusCompanyNS) and a.name == "Seabeast Buses")
+def sb(n: Network, gd: gt.GD):
+    company = next(a for a in gd.nodes(gt.BusCompany) if a.name == "Seabeast Buses")
 
-    for line_i in company.lines:
-        line: BusLineNS = data[line_i]
-        n.add_line(Line(id=line_i, name="SeaBeast " + line.code, colour=Colour.solid(line.colour or "#333")))
+    for line in company.lines:
+        n.add_line(Line(id=line.i, name="SeaBeast " + line.code, colour=Colour.solid(line.colour or "#333")))
 
-    stations = _station(n, company, data)
-    _connect(n, company, data)
+    stations = _station(n, company)
+    _connect(n, company)
     return stations
 
 
-def bus(data):
+def bus(gd):
     n = Network()
-    intra(n, data)
-    ccc(n, data)
-    sb(n, data)
+    intra(n, gd)
+    ccc(n, gd)
+    sb(n, gd)
 
-    handle_shared_stations(data, n)
-    handle_proximity(data, n)
+    handle_shared_stations(gd, n)
+    handle_proximity(gd, n)
     n.finalise()
 
     s = Drawer(n, Style(scale=0.075, station_dots=True)).draw()
     with open("maps/bus.svg", "w") as f:
         f.write(str(s))
+
+
+if __name__ == "__main__":
+    gd = gt.GD.urllib_get()
+
+    bus(gd)

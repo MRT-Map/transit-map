@@ -2,14 +2,14 @@ from __future__ import annotations
 
 from air import air
 from bus import bus
-from gatelogue_types import GatelogueDataNS
+import gatelogue_types as gt
 from rail import rail
 from sea import sea
 
 if __name__ == "__main__":
-    data = GatelogueDataNS.get()
+    gd = gt.GD.urllib_get()
 
-    air(data)
-    rail(data)
-    sea(data)
-    bus(data)
+    air(gd)
+    rail(gd)
+    sea(gd)
+    bus(gd)

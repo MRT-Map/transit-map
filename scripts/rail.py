@@ -5,50 +5,46 @@ from autocarter.drawer import Drawer
 from autocarter.network import Line, Network, Station
 from autocarter.style import Style
 from autocarter.vector import Vector
-from gatelogue_types import GatelogueDataNS, RailCompanyNS, RailLineNS
+import gatelogue_types as gt
+
+from utils import adjacent_stations
 from utils import _connect, _station, handle_proximity, handle_shared_stations
 
 
-def mrt(n: Network, data: GatelogueDataNS):
-    company = next(a for a in data if isinstance(a, RailCompanyNS) and a.name == "MRT")
+def mrt(n: Network, gd: gt.GD):
+    company = next(a for a in gd.nodes(gt.RailCompany) if a.name == "MRT")
 
-    for line_i in company.lines:
-        line: RailLineNS = data[line_i]
+    for line in company.lines:
         n.add_line(
             Line(
-                id=line_i,
+                id=line.i,
                 name="MRT " + line.code,
                 colour=Colour.solid(line.colour or "#888"),
             )
         )
 
-    stations = {}
-    for station_i in company.stations:
-        station = data[station_i]
-        if station.world == "Old" or not station.connections:
+    for station in company.stations:
+        if (
+            station.world == "Old"
+            or len(list(station.connections_to_here)) == 0
+            or len(list(station.connections_from_here)) == 0
+        ):
             continue
         coordinates = station.coordinates or [0, 0]
-        station = n.add_station(
+        n.add_station(
             Station(
-                id=station_i,
-                name=(
-                    " ".join(sorted(station.codes)) + " " + (station.name or "")
-                ).strip(),
+                id=station.i,
+                name=(" ".join(sorted(station.codes)) + " " + (station.name or "")).strip(),
                 coordinates=Vector(*coordinates),
             )
         )
-        stations[station.name] = station
 
-    _connect(n, company, data)
-
-    return stations
+    _connect(n, company)
 
 
-def the_rest(n: Network, data: GatelogueDataNS):
-    companies = sorted((a for a in data if isinstance(a, RailCompanyNS) and a.name != "MRT"), key=lambda a: a.name)
+def the_rest(n: Network, gd: gt.GD):
+    companies = sorted((a for a in gd.nodes(gt.RailCompany) if a.name != "MRT"), key=lambda a: a.name)
 
-    lines_all = {}
-    stations_all = {}
     for company in companies:
         prefix = {
             "BluRail": "Blu",
@@ -66,17 +62,14 @@ def the_rest(n: Network, data: GatelogueDataNS):
             "Lava Rail": "Lava",
             "CVCExpress": "CVC",
         }.get(company.name, company.name) or ""
-        lines = {}
-        for line_i in company.lines:
-            line: RailLineNS = data[line_i]
-
+        for line in company.lines:
             name = (
-                (line.code if company.local else prefix + " " + line.code)
+                (line.code if line.local else prefix + " " + line.code)
                 .strip()
                 .replace("<", "&lt;")
                 .replace(">", "&gt;")
             )
-            thickness = 0.5 if company.local else 1.0
+            thickness = 0.5 if line.local else 1.0
             colour = (
                 Colour(
                     (
@@ -84,146 +77,129 @@ def the_rest(n: Network, data: GatelogueDataNS):
                         Stroke(dashes="#fff", thickness_multiplier=thickness / 2),
                     )
                 )
-                if (
-                    company.name == "nFLR"
-                    and (line.code.startswith("W") or line.code.endswith("Rapid"))
-                ) or (company.name == "ErzLink Trams" and line.code.startswith("X"))
+                if (company.name == "nFLR" and (line.code.startswith("W") or line.code.endswith("Rapid")))
+                or (company.name == "ErzLink Trams" and line.code.startswith("X"))
                 or (company.name == "ErzLink Metro" and line.code.endswith("Express"))
                 else Colour.solid(line.colour or "#888", thickness)
             )
 
-            line2 = n.add_line(Line(id=line_i, name=name, colour=colour))
-            lines[line2.name] = line2
+            line2 = n.add_line(Line(id=line.i, name=name, colour=colour))
 
-        stations = _station(n, company, data)
-        _connect(n, company, data)
-        lines_all[company.name] = lines
-        stations_all[company.name] = stations
-    return stations_all, lines_all
+        _station(n, company)
+        _connect(n, company)
 
 
-def rail(data):
+def rail(gd):
     n = Network()
-    mrt(n, data)
-    s, l = the_rest(n, data)  # noqa: E741
+    mrt(n, gd)
+    the_rest(n, gd)  # noqa: E741
 
-    s_nflr, l_nflr = s["nFLR"], l["nFLR"]
-    s_intra, l_intra = s["IntraRail"], l["IntraRail"]
-    s_fr, l_fr = s["Fred Rail"], l["Fred Rail"]
-    s_blu = s["BluRail"]
+    adjacent_stations(n, gd, "nFLR", "Deadbush Karaj Expo", "R5A", ["Deadbush Works"], ["Deadbush New Euphorial"])
+    adjacent_stations(
+        n, gd, "nFLR", "Sansvikk Kamprad Airfield", "R23", ["Sansvikk Karlstad"], ["Glacierton", "Port Dupont"]
+    )
+    adjacent_stations(n, gd, "nFLR", "Glacierton", "R23", ["Snowydale"], ["Sansvikk Kamprad Airfield", "Port Dupont"])
+    adjacent_stations(
+        n, gd, "nFLR", "Port Dupont", "R23", ["Light Society Villeside"], ["Sansvikk Kamprad Airfield", "Glacierton"]
+    )
 
-    s_nflr["Deadbush Karaj Expo"].adjacent_stations[l_nflr["nFLR R5A"].id] = [
-        [s_nflr["Deadbush Works"].id],
-        [s_nflr["Deadbush Valletta"].id, s_nflr["Deadbush New Euphorial"].id],
-    ]
-    s_nflr["Sansvikk Kamprad Airfield"].adjacent_stations[l_nflr["nFLR R23"].id] = [
-        [s_nflr["Sansvikk Karlstad"].id],
-        [s_nflr["Glacierton"].id, s_nflr["Port Dupont"].id],
-    ]
-    s_nflr["Glacierton"].adjacent_stations[l_nflr["nFLR R23"].id] = [
-        [s_nflr["Snowydale"].id],
-        [s_nflr["Sansvikk Kamprad Airfield"].id, s_nflr["Port Dupont"].id],
-    ]
-    s_nflr["Port Dupont"].adjacent_stations[l_nflr["nFLR R23"].id] = [
-        [s_nflr["Light Society Villeside"].id],
-        [s_nflr["Sansvikk Kamprad Airfield"].id, s_nflr["Glacierton"].id],
-    ]
+    adjacent_stations(
+        n, gd, "Fred Rail", "New Haven", "New Jerseyan", ["Boston Clapham Junction"], ["Tung Wan Transfer", "Palo Alto"]
+    )
+    adjacent_stations(n, gd, "Fred Rail", "Palo Alto", "New Jerseyan", ["Concord"], ["Tung Wan Transfer", "New Haven"])
 
-    s_fr["New Haven"].adjacent_stations[l_fr["FR New Jerseyan"].id] = [
-        [s_fr["Boston Clapham Junction"].id],
-        [s_fr["Tung Wan Transfer"].id, s_fr["Palo Alto"].id],
-    ]
-    s_fr["Palo Alto"].adjacent_stations[l_fr["FR New Jerseyan"].id] = [
-        [s_fr["Concord"].id],
-        [s_fr["Tung Wan Transfer"].id, s_fr["New Haven"].id],
-    ]
+    adjacent_stations(
+        n,
+        gd,
+        "IntraRail",
+        "Laclede Airport Plaza",
+        "202",
+        ["Laclede Central"],
+        ["Amestris Cummins Highway", "Amestris Washington Street"],
+    )
+    adjacent_stations(
+        n,
+        gd,
+        "IntraRail",
+        "Formosa Northern",
+        "2X",
+        ["Kenthurst Aerodrome"],
+        ["UCWT International Airport East", "Danielston Paisley Place Transportation Center"],
+    )
+    adjacent_stations(
+        n,
+        gd,
+        "IntraRail",
+        "UCWT International Airport East",
+        "2X",
+        ["Sealane Central"],
+        ["Formosa Northern", "Danielston Paisley Place Transportation Center"],
+    )
+    adjacent_stations(
+        n,
+        gd,
+        "IntraRail",
+        "Central City Warp Rail Terminal",
+        "2X",
+        ["Central City Beltway Terminal North"],
+        ["Rochshire", "Achowalogen Takachsin-Covina International Airport"],
+    )
+    adjacent_stations(
+        n,
+        gd,
+        "IntraRail",
+        "Achowalogen Takachsin-Covina International Airport",
+        "2X",
+        ["Central City Warp Rail Terminal", "Sienos"],
+        ["Woodsbane", "Siletz Salvador Station"],
+    )
+    adjacent_stations(
+        n,
+        gd,
+        "IntraRail",
+        "Siletz Salvador Station",
+        "2X",
+        ["Woodsbane", "Achowalogen Takachsin-Covina International Airport"],
+    )
 
-    s_intra["Laclede Airport Plaza"].adjacent_stations[l_intra["IR 202"].id] = [
-        [s_blu["Laclede Central"].id],
-        [
-            s_intra["Amestris Cummins Highway"].id,
-            s_intra["Amestris Washington Street"].id,
-        ],
-    ]
-    s_intra["Formosa Northern"].adjacent_stations[l_intra["IR 2X"].id] = [
-        [s_intra["Kenthurst Aerodrome"].id],
-        [
-            s_intra["UCWT International Airport East"].id,
-            s_intra["Danielston Paisley Place Transportation Center"].id,
-        ],
-    ]
-    s_intra["UCWT International Airport East"].adjacent_stations[
-        l_intra["IR 2X"].id
-    ] = [
-        [
-            s_intra["Formosa Northern"].id,
-            s_intra["Danielston Paisley Place Transportation Center"].id,
-        ],
-        [s_blu["Sealane Central"].id],
-    ]
-    s_intra["Central City Warp Rail Terminal"].adjacent_stations[
-        l_intra["IR 2X"].id
-    ] = [
-        [s_fr["Central City Beltway Terminal North"].id],
-        [
-            s_intra["Rochshire"].id,
-            s_intra["Achowalogen Takachsin-Covina International Airport"].id,
-        ],
-    ]
-    s_intra["Achowalogen Takachsin-Covina International Airport"].adjacent_stations[
-        l_intra["IR 2X"].id
-    ] = [
-        [s_blu["Central City Warp Rail Terminal"].id, s_intra["Sienos"].id],
-        [s_intra["Woodsbane"].id, s_intra["Siletz Salvador Station"].id],
-    ]
-    s_intra["Siletz Salvador Station"].adjacent_stations[l_intra["IR 2X"].id] = [
-        [
-            s_intra["Woodsbane"].id,
-            s_intra["Achowalogen Takachsin-Covina International Airport"].id,
-        ],
-        [],
-    ]
+    adjacent_stations(n, gd, "FLR Kazeshima/Shui Chau", "Ho Kok", "C1", ["Ho Kok West", "Sha Tsui"])
 
-    s_flrk = s["FLR Kazeshima/Shui Chau"]
-    l_flrk = l["FLR Kazeshima/Shui Chau"]
-    s_flrk["Ho Kok"].adjacent_stations[l_flrk["C1"].id] = [
-        [s_flrk["Ho Kok West"].id, s_flrk["Sha Tsui"].id],
-        [],
-    ]
+    adjacent_stations(n, gd, "New Prubourne Subway", "Evergreen Parkway", "B", ["Wuster Drive", "Penn Island-Zoo"])
 
-    s_nps = s["New Prubourne Subway"]
-    l_nps = l["New Prubourne Subway"]
-    s_nps["Evergreen Parkway"].adjacent_stations[l_nps["B"].id] = [
-        [s_nps["Wuster Drive"].id, s_nps["Penn Island-Zoo"].id],
-        [],
-    ]
+    adjacent_stations(n, gd, "ErzLink Trams", "Atrium North", "3", ["Atrium West", "Atrium East"], ["Almono"])
+    adjacent_stations(
+        n, gd, "ErzLink Trams", "Atrium South", "3", ["Atrium West", "Atrium East"], ["Spire of New Domain"]
+    )
 
-    s_erzt = s["ErzLink Trams"]
-    l_erzt = l["ErzLink Trams"]
-    s_erzt["Atrium North"].adjacent_stations[l_erzt["3"].id] = [
-        [s_erzt["Atrium West"].id, s_erzt["Atrium East"].id],
-        [s_erzt["Almono"].id],
-    ]
-    s_erzt["Atrium South"].adjacent_stations[l_erzt["3"].id] = [
-        [s_erzt["Atrium West"].id, s_erzt["Atrium East"].id],
-        [s_erzt["Spire of New Domain"].id],
-    ]
+    adjacent_stations(
+        n,
+        gd,
+        "Refuge Streetcar",
+        "West Train Station",
+        "North/South Loop",
+        ["Cranberry Green", "Downtown North"],
+        ["Hilltop"],
+    )
+    adjacent_stations(
+        n,
+        gd,
+        "Refuge Streetcar",
+        "South Hill",
+        "North/South Loop",
+        ["Refuge Airfield North", "University South"],
+        ["Hilltop"],
+    )
 
-    s_ref = s["Refuge Streetcar"]
-    l_ref = l["Refuge Streetcar"]
-    s_ref["West Train Station"].adjacent_stations[l_ref["North/South Loop"].id] = [
-        [s_ref["Cranberry Green"].id, s_ref["Downtown North"].id],
-        [s_ref["Hilltop"].id],
-    ]
-    s_ref["South Hill"].adjacent_stations[l_ref["North/South Loop"].id] = [
-        [s_ref["Refuge Airfield North"].id, s_ref["University South"].id],
-        [s_ref["Hilltop"].id],
-    ]
-
-    handle_shared_stations(data, n)
-    handle_proximity(data, n)
+    handle_shared_stations(gd, n)
+    handle_proximity(gd, n)
     n.finalise()
 
     s = Drawer(n, Style(scale=0.1, station_dots=True)).draw()
     with open("maps/rail.svg", "w") as f:
         f.write(str(s))
+
+
+if __name__ == "__main__":
+    gd = gt.GD.urllib_get()
+
+    rail(gd)

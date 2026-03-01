@@ -5,53 +5,61 @@ from autocarter.drawer import Drawer
 from autocarter.network import Line, Network, Station
 from autocarter.style import Style
 from autocarter.vector import Vector
-from gatelogue_types import AirAirlineNS, AirAirportNS, AirFlightNS, GatelogueDataNS
+import gatelogue_types as gt
 from utils import handle_proximity, handle_shared_stations
 
 
-def air(data: GatelogueDataNS):
+def air(gd: gt.GD):
     n = Network()
 
-    for airport in (a for a in data if isinstance(a, AirAirportNS)):
+    for airport in gd.nodes(gt.AirAirport):
         if airport.coordinates is None:
             continue
+        x, y = airport.coordinates
         if airport.world == "Old":
-            x, y = airport.coordinates
-            airport.coordinates = (x + 30000 - 3200, y - 30000 - 3200 - 1000)
+            x, y = x + 30000 - 3200, y - 30000 - 3200 - 1000
 
         n.add_station(
             Station(
                 id=airport.i,
-                name=airport.code + " " + '/'.join(airport.names),
-                coordinates=Vector(*airport.coordinates),
+                name=airport.code + " " + "/".join(airport.names),
+                coordinates=Vector(x, y),
             )
         )
 
-    for company in (a for a in data if isinstance(a, AirAirlineNS)):
-        for flight_id in company.flights:
-            flight: AirFlightNS = data[flight_id]
-
+    for company in gd.nodes(gt.AirAirline):
+        for flight in company.flights:
             line = n.add_line(
                 Line(
-                    id=flight_id,
-                    name=company.name + " " + "/".join(flight.codes),
+                    id=flight.i,
+                    name=company.name + " " + "/".join(flight.code),
                     colour=Colour.solid("#888"),
                 )
             )
 
             prev_airport_id = None
-            for gate_id in flight.gates:
-                airport_id = data[gate_id].airport
-                if prev_airport_id is not None and prev_airport_id not in n.stations or airport_id not in n.stations:
+            for gate in (flight.from_, flight.to):
+                airport = gate.airport
+                if (
+                    prev_airport_id is not None
+                    and prev_airport_id not in n.station_id2index
+                    or airport.i not in n.station_id2index
+                ):
                     continue
                 if prev_airport_id is not None:
-                    n.connect(n.stations[prev_airport_id], n.stations[airport_id], line)
-                prev_airport_id = airport_id
+                    n.connect(n.station(prev_airport_id), n.station(airport.i), line)
+                prev_airport_id = airport.i
 
-    handle_shared_stations(data, n)
-    handle_proximity(data, n)
+    handle_shared_stations(gd, n)
+    handle_proximity(gd, n)
     n.finalise()
 
     s = Drawer(n, Style(scale=0.075, station_dots=True, stiffness=0.001)).draw()
     with open("maps/air.svg", "w") as f:
         f.write(str(s))
+
+
+if __name__ == "__main__":
+    gd = gt.GD.urllib_get()
+
+    air(gd)
