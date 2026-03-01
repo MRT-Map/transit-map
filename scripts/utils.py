@@ -111,4 +111,4 @@ def find_unconnected_stations(
     for station_ac in n.g.nodes():
         if len(station_ac.lines(n)) == 0:
             station_gt = gd.get_node(station_ac.id)
-            print("No conns", station_gt.company.name, station_gt.names)
+            print("No conns", station_gt.company.name, station_gt.name)

@@ -1,2 +1,3 @@
 autocarter @ git+https://github.com/iiiii7d/autocarter@rustworkx
 gatelogue-types @ git+https://github.com/mrt-map/gatelogue@v3#subdirectory=gatelogue-types-py
+niquests==3.17.0

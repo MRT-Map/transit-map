@@ -60,6 +60,6 @@ def air(gd: gt.GD):
 
 
 if __name__ == "__main__":
-    gd = gt.GD.urllib_get()
+    gd = gt.GD.niquests_get()
 
     air(gd)
