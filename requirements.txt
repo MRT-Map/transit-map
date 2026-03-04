@@ -1,2 +1,3 @@
 autocarter @ git+https://github.com/iiiii7d/autocarter
-gatelogue-types
+gatelogue-types>=3.0.0
+niquests==3.17.0
