@@ -7,7 +7,7 @@ from rail import rail
 from sea import sea
 
 if __name__ == "__main__":
-    gd = gt.GD.niquests_get()
+    gd = gt.GD.get(getter=gt.GD.Getters.niquests)
 
     air(gd)
     rail(gd)
