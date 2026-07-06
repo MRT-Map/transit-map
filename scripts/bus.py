@@ -40,12 +40,23 @@ def sb(n: Network, gd: gt.GD):
     _connect(n, company)
     return stations
 
+def mw(n: Network, gd: gt.GD):
+    company = next(a for a in gd.nodes(gt.BusCompany) if a.name == "Midwestern Bus Lines")
+
+    for line in company.lines:
+        n.add_line(Line(id=line.i, name="Midwestern " + line.code, colour=Colour.solid(line.colour or "#333")))
+
+    stations = _station(n, company)
+    _connect(n, company)
+    return stations
+
 
 def bus(gd):
     n = Network()
     intra(n, gd)
     ccc(n, gd)
     sb(n, gd)
+    mw(n, gd)
 
     handle_shared_stations(gd, n)
     handle_proximity(gd, n)
